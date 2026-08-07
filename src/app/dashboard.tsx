@@ -708,6 +708,8 @@ export default function Dashboard() {
       </header>
 
       <section className="dashboard-grid">
+        <aside className="side-panel" aria-label="Panel" />
+
         <section className="stage-column">
           <div className={`video-stage ${pendingCameraId ? "is-connecting" : ""}`}>
             <video ref={(node) => { videoRefs.current[0] = node; }} className={`stage-video ${activeSlot === 0 ? "visible" : ""}`} playsInline autoPlay muted={!audioEnabled} />
