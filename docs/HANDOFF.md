@@ -1,11 +1,11 @@
-# Lockard Live — AI handoff
+# 18nover — AI handoff
 
 Updated: 2026-08-05  
 Workspace: `C:\18nover\onlystream` (WSL: `/mnt/c/18nover/onlystream`)
 
 ## Current outcome
 
-Lockard Live is implemented as a private, desktop-first, one-to-many RTSP camera dashboard. The application UI, same-origin Sites routes, TypeScript relay controller, protected WHEP signaling gateway, Docker Compose topology, custom MediaMTX redirect guard, tests, and operations/security runbooks are present.
+18nover is implemented as a private, desktop-first, one-to-many RTSP camera dashboard. The application UI, same-origin Sites routes, TypeScript relay controller, protected WHEP signaling gateway, Docker Compose topology, custom MediaMTX redirect guard, tests, and operations/security runbooks are present.
 
 The dashboard now defaults to light mode. A moon/sun button in the header switches to dark mode and stores the device-local preference. The primary video remains dark in both themes so video controls and glass overlays remain readable.
 
@@ -51,7 +51,7 @@ Camera URLs, paths, queries, usernames, and passwords must remain server-side an
 
 ### Sites server boundary
 
-- Same-origin routes under `app/api/` for session and camera management.
+- Same-origin routes under `src/app/api/` for session and camera management.
 - Explicit Host, Moderator, and Member allowlists.
 - Host-only mutation checks.
 - HMAC-signed relay calls with timestamp, nonce, body digest, replay protection, bounded responses, and safe reconstruction.
@@ -90,12 +90,12 @@ Camera URLs, paths, queries, usernames, and passwords must remain server-side an
 
 | File | Purpose |
 | --- | --- |
-| `app/lockard-dashboard.tsx` | Main interactive dashboard, playback switching, theme, clock, voice, and Host controls |
-| `app/globals.css` | Dark design plus complete light-theme overrides |
-| `app/layout.tsx` | Metadata, fonts, light-first browser theme color |
-| `lib/client/whep.ts` | Strict browser WHEP reader and lifecycle |
-| `lib/server/auth.ts` | Sites identity and allowlist enforcement |
-| `lib/server/relay-client.ts` | Signed controller client and safe response handling |
+| `src/app/dashboard.tsx` | Main interactive dashboard, playback switching, theme, clock, voice, and Host controls |
+| `src/app/globals.css` | Dark design plus complete light-theme overrides |
+| `src/app/layout.tsx` | Metadata, fonts, light-first browser theme color |
+| `src/lib/client/whep.ts` | Strict browser WHEP reader and lifecycle |
+| `src/lib/server/auth.ts` | Sites identity and allowlist enforcement |
+| `src/lib/server/relay-client.ts` | Signed controller client and safe response handling |
 | `relay/src/cameras.ts` | Camera lifecycle, summaries, profiles, healing, and audit |
 | `relay/src/whep-gateway.ts` | One-use WHEP proxy and resource ownership |
 | `relay/src/network.ts` | URL, DNS, IP, port, pinning, and RTSPS checks |
@@ -104,7 +104,7 @@ Camera URLs, paths, queries, usernames, and passwords must remain server-side an
 | `relay/docker-compose.yml` | Private relay topology and published ports |
 | `docs/deployment-operations.md` | Bring-up, real-camera, capacity, backup, rollback, and release gates |
 | `docs/security-acceptance.md` | Trust boundaries, negative tests, and fail-closed credential audit |
-| `build/sites-vite-plugin.ts` | Required Sites build plugin; this is source, not disposable build output |
+| `src/build/sites-vite-plugin.ts` | Required Sites build plugin; this is source, not disposable build output |
 
 ## Latest verification
 
@@ -126,7 +126,7 @@ Passed:
 Useful checks after changing the UI:
 
 ```bash
-export PATH=/tmp/lockard-node-runtime/node-v24.19.0-linux-x64/bin:$PATH
+export PATH=/tmp/18nover-node-runtime/node-v24.19.0-linux-x64/bin:$PATH
 npm run typecheck
 npm run lint
 npm run build
@@ -137,7 +137,7 @@ Relay checks:
 
 ```bash
 cd relay
-export PATH=/tmp/lockard-node-runtime/node-v24.19.0-linux-x64/bin:$PATH
+export PATH=/tmp/18nover-node-runtime/node-v24.19.0-linux-x64/bin:$PATH
 npm run typecheck
 npm test
 npm run build
@@ -148,20 +148,20 @@ docker compose --env-file .env.example -f docker-compose.yml config --quiet
 
 The canonical project was moved to `C:\18nover\onlystream` on 2026-08-05, nested under the `18nover` company directory. The former generated Codex workspace directory was emptied, but Windows may keep that empty directory locked until the original Codex task closes. Do not treat the former path as another project copy.
 
-The Windows `C:` volume currently reports 100% utilization with about 1.1 GB free. A prior edit failed mid-write when free space reached zero. `app/lockard-dashboard.tsx` was recovered from the verified source archive, and the required `build/sites-vite-plugin.ts` was restored from the identical Sites starter.
+The Windows `C:` volume currently reports 100% utilization with about 1.1 GB free. A prior edit failed mid-write when free space reached zero. `src/app/dashboard.tsx` was recovered from the verified source archive, and the required `src/build/sites-vite-plugin.ts` was restored from the identical Sites starter.
 
 Only regenerable caches were removed. Current temporary runtime links are:
 
 ```text
-node_modules -> /tmp/lockard-site-deps.NMOC1U/node_modules
-relay/node_modules -> /tmp/lockard-relay-deps.Iwjfif/node_modules
-dist -> /tmp/lockard-dist
-.vinext -> /tmp/lockard-vinext-cache
-.wrangler -> /tmp/lockard-wrangler
-Node runtime -> /tmp/lockard-node-runtime/node-v24.19.0-linux-x64
+node_modules -> /tmp/18nover-site-deps.NMOC1U/node_modules
+relay/node_modules -> /tmp/18nover-relay-deps.Iwjfif/node_modules
+dist -> /tmp/18nover-dist
+.vinext -> /tmp/18nover-vinext-cache
+.wrangler -> /tmp/18nover-wrangler
+Node runtime -> /tmp/18nover-node-runtime/node-v24.19.0-linux-x64
 ```
 
-These `/tmp` paths are ephemeral. Free substantial Windows disk space before reinstalling dependencies, building Docker images, or assuming the setup will survive a WSL/reboot boundary. Do not delete source directories to make space. In particular, do not delete `build/`; it contains required source.
+These `/tmp` paths are ephemeral. Free substantial Windows disk space before reinstalling dependencies, building Docker images, or assuming the setup will survive a WSL/reboot boundary. Do not delete source directories to make space. In particular, do not delete `src/build/`; it contains required source.
 
 ## Worktree state
 
@@ -209,9 +209,9 @@ Do not describe those items as complete.
 
 ## Deliverable fingerprints
 
-- `outputs/lockard-live-source.tar.gz`  
+- `outputs/18nover-source.tar.gz`  
   SHA-256: `4dc05d32759a13a0f22e2400459c8cbae2f75da816aee61848a0ddaa6e35a787`
-- `outputs/lockard-live-social-card.png`  
+- `outputs/18nover-social-card.png`  
   SHA-256: `776e174ff1ac3a60c6b4a62f894d11b8fc8ead02f0bbb1de33b9fdb7e46567c7`
 
 Never put camera URLs, credentials, HMAC keys, database keys, JWT private keys, SDP, bearer tokens, or process argument dumps into a prompt, commit, log bundle, or handoff.

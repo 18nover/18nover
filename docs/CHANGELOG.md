@@ -1,4 +1,4 @@
-# Lockard Live — changelog
+# 18nover — changelog
 
 All dates are 2026-08-05 unless noted otherwise.
 
@@ -14,7 +14,7 @@ All dates are 2026-08-05 unless noted otherwise.
 
 - Light mode as the deterministic default dashboard theme.
 - Persistent moon/sun theme toggle in the header.
-- Device-local theme preference under `lockard-live-theme`.
+- Device-local theme preference under `18nover-theme`.
 - Complete light treatment for the header, status rail, camera cards, companion panels, voice footer, sheets, dialogs, toasts, forms, and tooltips.
 - Dark media-island treatment retained for the primary video and glass player controls in both themes.
 - SSR regression assertions for default light mode, the theme control, and the stable stream-clock placeholder.
@@ -24,7 +24,7 @@ All dates are 2026-08-05 unless noted otherwise.
 - React hydration mismatch caused by `useState(new Date())` plus server/browser timezone and second differences.
 - Server HTML now renders `--:--:--`; the localized clock begins asynchronously after hydration.
 - Keyboard focus now reveals the chat message overflow action, not only pointer hover.
-- Restored the required `build/sites-vite-plugin.ts` after it was incorrectly treated as disposable output during emergency disk cleanup.
+- Restored the required `src/build/sites-vite-plugin.ts` after it was incorrectly treated as disposable output during emergency disk cleanup.
 - Updated ignore rules so temporary `dist`, `.vinext`, and `.wrangler` symlinks cannot be staged accidentally.
 
 ### Verified
@@ -39,7 +39,7 @@ All dates are 2026-08-05 unless noted otherwise.
 ### Operational incident
 
 - The Windows `C:` drive reached zero free bytes and interrupted a source-file write.
-- Recovered `app/lockard-dashboard.tsx` from the previously verified source archive.
+- Recovered `src/app/dashboard.tsx` from the previously verified source archive.
 - Removed only regenerable caches and moved active build/runtime caches to `/tmp` symlinks.
 - The drive now reports approximately 1.1 GB free but remains at 100% utilization; further durable work requires cleanup.
 
@@ -101,7 +101,7 @@ All dates are 2026-08-05 unless noted otherwise.
 ### Added
 
 - Premium desktop-first three-column livestream dashboard.
-- Sticky header with Lockard Live branding, live/standby state, uptime, health, viewer count, search, notification center, and profile controls.
+- Sticky header with 18nover branding, live/standby state, uptime, health, viewer count, search, notification center, and profile controls.
 - Left operations rail with viewers, voice, camera, bitrate, latency, FPS, CPU, and network status.
 - Large 16:9 primary stage with dark glass overlays and hover player controls.
 - Horizontal camera switcher with Host-only registration card and camera context menus.
@@ -123,8 +123,8 @@ All dates are 2026-08-05 unless noted otherwise.
 
 ### Changed
 
-- Replaced the broken social image with a generated, reference-informed Lockard Live infrastructure card.
-- Saved the verified image as `public/og.png` and `outputs/lockard-live-social-card.png`.
+- Replaced the broken social image with a generated, reference-informed 18nover infrastructure card.
+- Saved the verified image as `public/og.png` and `outputs/18nover-social-card.png`.
 - Updated Open Graph and X metadata to use the exact 1731 x 909 PNG.
 - Added PNG signature and IHDR dimension regression coverage.
 

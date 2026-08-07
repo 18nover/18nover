@@ -1,10 +1,10 @@
-# Lockard Live relay deployment and operations
+# 18nover relay deployment and operations
 
-Lockard Live does not embed VLC. It reproduces VLC's **Open Network Stream** workflow while keeping the media source and credentials server-side:
+18nover does not embed VLC. It reproduces VLC's **Open Network Stream** workflow while keeping the media source and credentials server-side:
 
 `Public RTSP/RTSPS camera -> redirect-guarded MediaMTX/FFmpeg -> controller WHEP gateway -> WebRTC browser`
 
-Release is deliberately two-stage. First deploy a Sites candidate whose access policy and Lockard identity allowlists contain only named integration operators. Run every real-camera, capacity, security, backup, and rollback gate from that exact origin. Only then may an operator widen the private Sites audience. If an access-restricted candidate cannot be created, stop; do not substitute a broadly accessible preview.
+Release is deliberately two-stage. First deploy a Sites candidate whose access policy and 18nover identity allowlists contain only named integration operators. Run every real-camera, capacity, security, backup, and rollback gate from that exact origin. Only then may an operator widen the private Sites audience. If an access-restricted candidate cannot be created, stop; do not substitute a broadly accessible preview.
 
 ## Supported bring-up baseline
 
@@ -29,7 +29,7 @@ The hardened source path is TCP-only. The Sites sheet may display transport choi
 - Every DNS answer must be globally routable. The controller chooses one validated address, rewrites the source to that address, fixes the port, and repeats resolution/validation when reconnecting.
 - For RTSPS, the controller performs a trusted TLS handshake to the pinned address using the original DNS name for SNI/certificate validation, computes the peer certificate's SHA-256 fingerprint, and gives that fingerprint to MediaMTX.
 - `rtspAnyPort` remains disabled.
-- The supplied `lockard-mediamtx:1.19.3-redirect-guard` image is built from exact upstream commit `5ccc80ad7b1609330a4c397c51a7e701f963d74f`. Its local patch removes RTSP redirect locations before they can be followed and refuses a source TCP dial unless its destination is the exact validated IP-and-port tuple.
+- The supplied `18nover-mediamtx:1.19.3-redirect-guard` image is built from exact upstream commit `5ccc80ad7b1609330a4c397c51a7e701f963d74f`. Its local patch removes RTSP redirect locations before they can be followed and refuses a source TCP dial unless its destination is the exact validated IP-and-port tuple.
 
 Treat that MediaMTX image as a maintained security fork. A future MediaMTX upgrade requires a patch review, a successful patch application against the new exact commit, redirect/dial-target negative tests, and a newly approved image ID or registry digest. A version tag alone is not sufficient evidence.
 
@@ -57,7 +57,7 @@ The custom MediaMTX image is part of the build, not an interchangeable public im
 ```bash
 docker compose --env-file relay/.env -f relay/docker-compose.yml config --quiet
 docker compose --env-file relay/.env -f relay/docker-compose.yml build --pull controller mediamtx
-docker image inspect lockard-mediamtx:1.19.3-redirect-guard --format '{{.Id}}'
+docker image inspect 18nover-mediamtx:1.19.3-redirect-guard --format '{{.Id}}'
 docker compose --env-file relay/.env -f relay/docker-compose.yml up -d
 docker compose --env-file relay/.env -f relay/docker-compose.yml ps
 curl --fail --silent --show-error https://stream.example.com/healthz
@@ -81,17 +81,17 @@ Create a saved Sites candidate version restricted by the Sites access policy to 
 | Name | Visibility | Value |
 | --- | --- | --- |
 | `SITES_ORIGIN` | normal | Exact access-restricted candidate HTTPS origin |
-| `LOCKARD_RELAY_ORIGIN` | normal | Exact relay HTTPS origin |
-| `LOCKARD_RELAY_HMAC_KEY_ID` | normal | `sites-v1` |
-| `LOCKARD_RELAY_HMAC_SECRET_BASE64` | secret | Matching value from the relay HMAC JSON file |
-| `LOCKARD_HOST_USER_IDS` | normal | Comma-separated stable Sites IDs allowed to manage cameras; at least one is required in production |
-| `LOCKARD_MODERATOR_USER_IDS` | normal | Comma-separated stable Sites IDs that may view and use companion features but cannot manage cameras |
-| `LOCKARD_MEMBER_USER_IDS` | normal | Comma-separated stable Sites IDs that may view and use companion features but cannot manage cameras |
-| `LOCKARD_RELAY_TIMEOUT_MS` | normal | `10000` unless an operator approves another bounded value |
+| `NOVER_RELAY_ORIGIN` | normal | Exact relay HTTPS origin |
+| `NOVER_RELAY_HMAC_KEY_ID` | normal | `sites-v1` |
+| `NOVER_RELAY_HMAC_SECRET_BASE64` | secret | Matching value from the relay HMAC JSON file |
+| `NOVER_HOST_USER_IDS` | normal | Comma-separated stable Sites IDs allowed to manage cameras; at least one is required in production |
+| `NOVER_MODERATOR_USER_IDS` | normal | Comma-separated stable Sites IDs that may view and use companion features but cannot manage cameras |
+| `NOVER_MEMBER_USER_IDS` | normal | Comma-separated stable Sites IDs that may view and use companion features but cannot manage cameras |
+| `NOVER_RELAY_TIMEOUT_MS` | normal | `10000` unless an operator approves another bounded value |
 
 The application allowlists are an additional boundary, not a replacement for the Sites access policy. An authenticated Sites identity absent from all three lists must receive HTTP 403. If an ID appears in multiple lists, Host takes precedence, then Moderator, then Member. Only a Host can probe, create, edit, retest, pause, or delete cameras.
 
-Do not configure any `LOCKARD_DEV_*` value in a hosted candidate or production. A Sites environment revision takes effect only after a new saved version is deployed. Because Caddy and the WHEP gateway enforce one exact `SITES_ORIGIN`, update the relay environment and retest CORS if the origin changes; do not temporarily allow `*`.
+Do not configure any `NOVER_DEV_*` value in a hosted candidate or production. A Sites environment revision takes effect only after a new saved version is deployed. Because Caddy and the WHEP gateway enforce one exact `SITES_ORIGIN`, update the relay environment and retest CORS if the origin changes; do not temporarily allow `*`.
 
 ## WHEP authorization and lifecycle gate
 
@@ -111,7 +111,7 @@ Use a read-only camera account. The selected design accepts only public, globall
 
 For every approved camera:
 
-1. Sign in to the access-restricted candidate as a named user in `LOCKARD_HOST_USER_IDS`.
+1. Sign in to the access-restricted candidate as a named user in `NOVER_HOST_USER_IDS`.
 2. Open **Add RTSP camera** and enter the URL plus the separate read-only username and password. Confirm only TCP is selectable.
 3. Select **Test connection**. Confirm codec, B-frame status, dimensions, FPS, bitrate, audio codec, most recent frame, and Direct/Transcoded decision against an independent operator `ffprobe` run that does not expose its command line or output to viewers.
 4. Save the camera. Confirm the browser receives only `CameraSummary`; responses contain no source host, path, query, username, password, encrypted envelope, or source fingerprint.
@@ -138,8 +138,8 @@ Run one browser reader against an H.265, MJPEG, H.264-with-B-frames/high-profile
 Count workers by executable name only; never collect process arguments:
 
 ```bash
-LOCKARD_CONTROLLER_ID=$(docker compose --env-file relay/.env -f relay/docker-compose.yml ps -q controller)
-docker top "$LOCKARD_CONTROLLER_ID" -eo comm | awk '$1 == "ffmpeg" { count++ } END { print count + 0 }'
+NOVER_CONTROLLER_ID=$(docker compose --env-file relay/.env -f relay/docker-compose.yml ps -q controller)
+docker top "$NOVER_CONTROLLER_ID" -eo comm | awk '$1 == "ffmpeg" { count++ } END { print count + 0 }'
 ```
 
 ### 3. Two cameras and 12 viewers for 30 minutes
@@ -150,20 +150,20 @@ Capture a resource sample every minute. This example stores container state and 
 
 ```bash
 set -euo pipefail
-LOCKARD_RUN_ID=$(date -u +%Y%m%dT%H%M%SZ)
-LOCKARD_CAPACITY_DIR="work/capacity/$LOCKARD_RUN_ID"
-install -d -m 700 "$LOCKARD_CAPACITY_DIR"
-LOCKARD_COMPOSE=(docker compose --env-file relay/.env -f relay/docker-compose.yml)
-LOCKARD_CONTAINER_IDS=("$("${LOCKARD_COMPOSE[@]}" ps -q controller)" "$("${LOCKARD_COMPOSE[@]}" ps -q mediamtx)" "$("${LOCKARD_COMPOSE[@]}" ps -q caddy)")
+NOVER_RUN_ID=$(date -u +%Y%m%dT%H%M%SZ)
+NOVER_CAPACITY_DIR="work/capacity/$NOVER_RUN_ID"
+install -d -m 700 "$NOVER_CAPACITY_DIR"
+NOVER_COMPOSE=(docker compose --env-file relay/.env -f relay/docker-compose.yml)
+NOVER_CONTAINER_IDS=("$("${NOVER_COMPOSE[@]}" ps -q controller)" "$("${NOVER_COMPOSE[@]}" ps -q mediamtx)" "$("${NOVER_COMPOSE[@]}" ps -q caddy)")
 
-for LOCKARD_SAMPLE in $(seq 0 30); do
-  date -u +%Y-%m-%dT%H:%M:%SZ >> "$LOCKARD_CAPACITY_DIR/timeline.txt"
-  docker stats --no-stream --format '{{json .}}' "${LOCKARD_CONTAINER_IDS[@]}" >> "$LOCKARD_CAPACITY_DIR/docker-stats.jsonl"
-  for LOCKARD_CONTAINER_ID in "${LOCKARD_CONTAINER_IDS[@]}"; do
-    docker inspect --format '{{json .State}}' "$LOCKARD_CONTAINER_ID" >> "$LOCKARD_CAPACITY_DIR/container-state.jsonl"
+for NOVER_SAMPLE in $(seq 0 30); do
+  date -u +%Y-%m-%dT%H:%M:%SZ >> "$NOVER_CAPACITY_DIR/timeline.txt"
+  docker stats --no-stream --format '{{json .}}' "${NOVER_CONTAINER_IDS[@]}" >> "$NOVER_CAPACITY_DIR/docker-stats.jsonl"
+  for NOVER_CONTAINER_ID in "${NOVER_CONTAINER_IDS[@]}"; do
+    docker inspect --format '{{json .State}}' "$NOVER_CONTAINER_ID" >> "$NOVER_CAPACITY_DIR/container-state.jsonl"
   done
-  docker top "${LOCKARD_CONTAINER_IDS[0]}" -eo comm >> "$LOCKARD_CAPACITY_DIR/controller-process-names.txt"
-  if [ "$LOCKARD_SAMPLE" -lt 30 ]; then sleep 60; fi
+  docker top "${NOVER_CONTAINER_IDS[0]}" -eo comm >> "$NOVER_CAPACITY_DIR/controller-process-names.txt"
+  if [ "$NOVER_SAMPLE" -lt 30 ]; then sleep 60; fi
 done
 ```
 
@@ -194,24 +194,24 @@ Freeze Host camera management before a snapshot. Resolve the exact Compose-manag
 
 ```bash
 set -euo pipefail
-LOCKARD_COMPOSE=(docker compose --env-file relay/.env -f relay/docker-compose.yml)
-mapfile -t LOCKARD_RELAY_VOLUMES < <(docker volume ls -q \
-  --filter label=com.docker.compose.project=lockard-live-relay \
+NOVER_COMPOSE=(docker compose --env-file relay/.env -f relay/docker-compose.yml)
+mapfile -t NOVER_RELAY_VOLUMES < <(docker volume ls -q \
+  --filter label=com.docker.compose.project=18nover-relay \
   --filter label=com.docker.compose.volume=relay_data)
-[ "${#LOCKARD_RELAY_VOLUMES[@]}" -eq 1 ]
-LOCKARD_RELAY_VOLUME=${LOCKARD_RELAY_VOLUMES[0]}
+[ "${#NOVER_RELAY_VOLUMES[@]}" -eq 1 ]
+NOVER_RELAY_VOLUME=${NOVER_RELAY_VOLUMES[0]}
 install -d -m 700 backups
-LOCKARD_BACKUP_DIR=$(realpath backups)
-LOCKARD_BACKUP_FILE="relay-data-$(date -u +%Y%m%dT%H%M%SZ).tar.gz"
+NOVER_BACKUP_DIR=$(realpath backups)
+NOVER_BACKUP_FILE="relay-data-$(date -u +%Y%m%dT%H%M%SZ).tar.gz"
 
-"${LOCKARD_COMPOSE[@]}" stop controller
+"${NOVER_COMPOSE[@]}" stop controller
 docker run --rm \
-  --mount "type=volume,src=$LOCKARD_RELAY_VOLUME,dst=/source,readonly" \
-  --mount "type=bind,src=$LOCKARD_BACKUP_DIR,dst=/backup" \
-  --env LOCKARD_BACKUP_FILE \
-  alpine:3.23.3 sh -ec 'cd /source && tar -czf "/backup/$LOCKARD_BACKUP_FILE" .'
-(cd "$LOCKARD_BACKUP_DIR" && sha256sum "$LOCKARD_BACKUP_FILE" > "$LOCKARD_BACKUP_FILE.sha256")
-"${LOCKARD_COMPOSE[@]}" up -d controller
+  --mount "type=volume,src=$NOVER_RELAY_VOLUME,dst=/source,readonly" \
+  --mount "type=bind,src=$NOVER_BACKUP_DIR,dst=/backup" \
+  --env NOVER_BACKUP_FILE \
+  alpine:3.23.3 sh -ec 'cd /source && tar -czf "/backup/$NOVER_BACKUP_FILE" .'
+(cd "$NOVER_BACKUP_DIR" && sha256sum "$NOVER_BACKUP_FILE" > "$NOVER_BACKUP_FILE.sha256")
+"${NOVER_COMPOSE[@]}" up -d controller
 curl --fail --silent --show-error https://stream.example.com/readyz
 ```
 
@@ -221,24 +221,24 @@ To restore, first deploy the matching code/images and Sites version, stop camera
 
 ```bash
 set -euo pipefail
-LOCKARD_COMPOSE=(docker compose --env-file relay/.env -f relay/docker-compose.yml)
-mapfile -t LOCKARD_RELAY_VOLUMES < <(docker volume ls -q \
-  --filter label=com.docker.compose.project=lockard-live-relay \
+NOVER_COMPOSE=(docker compose --env-file relay/.env -f relay/docker-compose.yml)
+mapfile -t NOVER_RELAY_VOLUMES < <(docker volume ls -q \
+  --filter label=com.docker.compose.project=18nover-relay \
   --filter label=com.docker.compose.volume=relay_data)
-[ "${#LOCKARD_RELAY_VOLUMES[@]}" -eq 1 ]
-LOCKARD_RELAY_VOLUME=${LOCKARD_RELAY_VOLUMES[0]}
-LOCKARD_BACKUP_DIR=$(realpath backups)
-LOCKARD_RESTORE_FILE=relay-data-YYYYMMDDTHHMMSSZ.tar.gz
-cd "$LOCKARD_BACKUP_DIR"
-sha256sum --check "$LOCKARD_RESTORE_FILE.sha256"
+[ "${#NOVER_RELAY_VOLUMES[@]}" -eq 1 ]
+NOVER_RELAY_VOLUME=${NOVER_RELAY_VOLUMES[0]}
+NOVER_BACKUP_DIR=$(realpath backups)
+NOVER_RESTORE_FILE=relay-data-YYYYMMDDTHHMMSSZ.tar.gz
+cd "$NOVER_BACKUP_DIR"
+sha256sum --check "$NOVER_RESTORE_FILE.sha256"
 cd - >/dev/null
-"${LOCKARD_COMPOSE[@]}" stop controller
+"${NOVER_COMPOSE[@]}" stop controller
 docker run --rm \
-  --mount "type=volume,src=$LOCKARD_RELAY_VOLUME,dst=/restore" \
-  --mount "type=bind,src=$LOCKARD_BACKUP_DIR,dst=/backup,readonly" \
-  --env LOCKARD_RESTORE_FILE \
-  alpine:3.23.3 sh -ec 'find /restore -mindepth 1 -depth -delete; tar -xzf "/backup/$LOCKARD_RESTORE_FILE" -C /restore; chown -R 10001:10001 /restore'
-"${LOCKARD_COMPOSE[@]}" up -d controller
+  --mount "type=volume,src=$NOVER_RELAY_VOLUME,dst=/restore" \
+  --mount "type=bind,src=$NOVER_BACKUP_DIR,dst=/backup,readonly" \
+  --env NOVER_RESTORE_FILE \
+  alpine:3.23.3 sh -ec 'find /restore -mindepth 1 -depth -delete; tar -xzf "/backup/$NOVER_RESTORE_FILE" -C /restore; chown -R 10001:10001 /restore'
+"${NOVER_COMPOSE[@]}" up -d controller
 curl --fail --silent --show-error https://stream.example.com/readyz
 ```
 

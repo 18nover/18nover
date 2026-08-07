@@ -1,10 +1,10 @@
-# Lockard Live security acceptance
+# 18nover security acceptance
 
 Run this checklist against an access-restricted Sites candidate before the first production audience is admitted and after any change to identity mapping, source validation, authentication, WHEP signaling, media routing, logging, container isolation, the custom MediaMTX patch, or secrets. Record sanitized evidence and an accountable operator for every result.
 
 ## Trust boundaries
 
-- **Browser -> Sites:** Sites supplies an authenticated stable user ID. Lockard Live admits it only when the ID appears in an explicit Host, Moderator, or Member allowlist. Browser API writes require the exact configured origin and same-origin fetch context; only Host may manage cameras.
+- **Browser -> Sites:** Sites supplies an authenticated stable user ID. 18nover admits it only when the ID appears in an explicit Host, Moderator, or Member allowlist. Browser API writes require the exact configured origin and same-origin fetch context; only Host may manage cameras.
 - **Sites -> controller:** HMAC-SHA256 binds version, timestamp, one-time nonce, method, exact path, and exact body digest. Clock skew is at most 30 seconds, replay nonces persist in SQLite, and responses are reconstructed from safe fields.
 - **Browser -> controller WHEP gateway:** Caddy forwards `/whep/*` to the controller. A five-minute ES256 bearer grant is valid once, for one exact output path and `read` only. One viewer may hold at most three active resources. The gateway enforces exact CORS origin, bounded SDP, a renewable ten-minute lease, and authenticated `HEAD`/`DELETE` ownership.
 - **Controller -> MediaMTX:** Control API and WHEP HTTP stay on the internal control network and require path-scoped JWTs. MediaMTX validates the controller's JWKS issuer and audience. The browser never reaches MediaMTX WHEP HTTP directly.
@@ -40,7 +40,7 @@ Retain automated tests where practical and run host/real-network cases as integr
 
 The committed relay suite covers AES-GCM AAD/tamper, keyed source fingerprints/redaction, persistent nonces, HMAC binding and future-dated replay, exact-path ES256 permissions, one-use/capped viewer grants, address classes, URL pinning, codec planning, and transcoder capacity. The custom MediaMTX image, redirect handling, RTSPS handshake, DNS reconnect, complete WHEP proxy lifecycle, Docker isolation, ICE, and real cameras remain integration gates on the selected host.
 
-For redirect testing, operate a public test RTSP endpoint that returns each malicious `Location` while a second endpoint records connection attempts. The Lockard probe must fail generically, the second endpoint must record zero connections, and MediaMTX logs may say only that a redirect was rejected. Repeat with a legal first response that later tries to switch port/address. Do not use production camera credentials in this fixture.
+For redirect testing, operate a public test RTSP endpoint that returns each malicious `Location` while a second endpoint records connection attempts. The 18nover probe must fail generically, the second endpoint must record zero connections, and MediaMTX logs may say only that a redirect was rejected. Repeat with a legal first response that later tries to switch port/address. Do not use production camera credentials in this fixture.
 
 ## Fail-closed credential-leak audit
 
@@ -49,30 +49,30 @@ Run this on the Linux Docker host from the repository root **after** a productio
 ```bash
 set -euo pipefail
 umask 077
-LOCKARD_AUDIT_DIR=$(mktemp -d)
-trap 'find "$LOCKARD_AUDIT_DIR" -type f -delete; rmdir "$LOCKARD_AUDIT_DIR"' EXIT
-LOCKARD_AUDIT_PATTERNS="$LOCKARD_AUDIT_DIR/patterns"
-LOCKARD_AUDIT_CAMERA_RAW="$LOCKARD_AUDIT_DIR/camera-raw"
-: > "$LOCKARD_AUDIT_PATTERNS"
-: > "$LOCKARD_AUDIT_CAMERA_RAW"
+NOVER_AUDIT_DIR=$(mktemp -d)
+trap 'find "$NOVER_AUDIT_DIR" -type f -delete; rmdir "$NOVER_AUDIT_DIR"' EXIT
+NOVER_AUDIT_PATTERNS="$NOVER_AUDIT_DIR/patterns"
+NOVER_AUDIT_CAMERA_RAW="$NOVER_AUDIT_DIR/camera-raw"
+: > "$NOVER_AUDIT_PATTERNS"
+: > "$NOVER_AUDIT_CAMERA_RAW"
 
-append_lockard_pattern() {
-  local LOCKARD_LABEL=$1
-  local LOCKARD_VALUE
-  IFS= read -r -s -p "$LOCKARD_LABEL: " LOCKARD_VALUE
+append_nover_pattern() {
+  local NOVER_LABEL=$1
+  local NOVER_VALUE
+  IFS= read -r -s -p "$NOVER_LABEL: " NOVER_VALUE
   printf '\n' >&2
-  if [ -n "$LOCKARD_VALUE" ]; then
-    printf '%s\n' "$LOCKARD_VALUE" >> "$LOCKARD_AUDIT_CAMERA_RAW"
+  if [ -n "$NOVER_VALUE" ]; then
+    printf '%s\n' "$NOVER_VALUE" >> "$NOVER_AUDIT_CAMERA_RAW"
   fi
-  unset LOCKARD_VALUE
+  unset NOVER_VALUE
 }
 
-append_lockard_pattern 'Complete RTSP/RTSPS URL'
-append_lockard_pattern 'Camera username'
-append_lockard_pattern 'Camera password'
-append_lockard_pattern 'Vendor path/query token (blank if none)'
+append_nover_pattern 'Complete RTSP/RTSPS URL'
+append_nover_pattern 'Camera username'
+append_nover_pattern 'Camera password'
+append_nover_pattern 'Vendor path/query token (blank if none)'
 
-node - "$LOCKARD_AUDIT_CAMERA_RAW" "$LOCKARD_AUDIT_PATTERNS" <<'NODE'
+node - "$NOVER_AUDIT_CAMERA_RAW" "$NOVER_AUDIT_PATTERNS" <<'NODE'
 const fs = require('node:fs');
 const cameraInput = process.argv[2];
 const output = process.argv[3];
@@ -99,40 +99,40 @@ for (const line of fs.readFileSync('relay/secrets/relay_jwt_private_key.pem', 'u
 }
 NODE
 
-sort -u -o "$LOCKARD_AUDIT_PATTERNS" "$LOCKARD_AUDIT_PATTERNS"
-[ -s "$LOCKARD_AUDIT_PATTERNS" ]
+sort -u -o "$NOVER_AUDIT_PATTERNS" "$NOVER_AUDIT_PATTERNS"
+[ -s "$NOVER_AUDIT_PATTERNS" ]
 
-docker compose --env-file relay/.env -f relay/docker-compose.yml logs --no-color > "$LOCKARD_AUDIT_DIR/compose.log"
-for LOCKARD_SERVICE in controller mediamtx caddy; do
-  LOCKARD_CONTAINER_ID=$(docker compose --env-file relay/.env -f relay/docker-compose.yml ps -q "$LOCKARD_SERVICE")
-  [ -n "$LOCKARD_CONTAINER_ID" ]
-  docker top "$LOCKARD_CONTAINER_ID" -eo pid,user,comm,args >> "$LOCKARD_AUDIT_DIR/process-list.txt"
+docker compose --env-file relay/.env -f relay/docker-compose.yml logs --no-color > "$NOVER_AUDIT_DIR/compose.log"
+for NOVER_SERVICE in controller mediamtx caddy; do
+  NOVER_CONTAINER_ID=$(docker compose --env-file relay/.env -f relay/docker-compose.yml ps -q "$NOVER_SERVICE")
+  [ -n "$NOVER_CONTAINER_ID" ]
+  docker top "$NOVER_CONTAINER_ID" -eo pid,user,comm,args >> "$NOVER_AUDIT_DIR/process-list.txt"
 done
 
-LOCKARD_AUDIT_TARGETS=(
-  README.md app lib public docs .env.example
+NOVER_AUDIT_TARGETS=(
+  README.md src public docs .env.example
   relay/src relay/test relay/Caddyfile relay/Dockerfile relay/docker-compose.yml
   relay/mediamtx.yml relay/.env.example relay/package.json relay/package-lock.json
   relay/tsconfig.json relay/mediamtx
-  "$LOCKARD_AUDIT_DIR/compose.log" "$LOCKARD_AUDIT_DIR/process-list.txt"
+  "$NOVER_AUDIT_DIR/compose.log" "$NOVER_AUDIT_DIR/process-list.txt"
 )
-for LOCKARD_OPTIONAL_TARGET in build dist .vinext relay/dist; do
-  if [ -e "$LOCKARD_OPTIONAL_TARGET" ]; then
-    LOCKARD_AUDIT_TARGETS+=("$LOCKARD_OPTIONAL_TARGET")
+for NOVER_OPTIONAL_TARGET in src/build dist .vinext relay/dist; do
+  if [ -e "$NOVER_OPTIONAL_TARGET" ]; then
+    NOVER_AUDIT_TARGETS+=("$NOVER_OPTIONAL_TARGET")
   fi
 done
 
 set +e
-rg -l -F -f "$LOCKARD_AUDIT_PATTERNS" "${LOCKARD_AUDIT_TARGETS[@]}"
-LOCKARD_AUDIT_STATUS=$?
+rg -l -F -f "$NOVER_AUDIT_PATTERNS" "${NOVER_AUDIT_TARGETS[@]}"
+NOVER_AUDIT_STATUS=$?
 set -e
-if [ "$LOCKARD_AUDIT_STATUS" -eq 0 ]; then
+if [ "$NOVER_AUDIT_STATUS" -eq 0 ]; then
   printf '%s\n' 'FAIL: a protected value was found in one or more files above.' >&2
   exit 1
 fi
-if [ "$LOCKARD_AUDIT_STATUS" -ne 1 ]; then
-  printf 'FAIL: credential scanner exited with status %s.\n' "$LOCKARD_AUDIT_STATUS" >&2
-  exit "$LOCKARD_AUDIT_STATUS"
+if [ "$NOVER_AUDIT_STATUS" -ne 1 ]; then
+  printf 'FAIL: credential scanner exited with status %s.\n' "$NOVER_AUDIT_STATUS" >&2
+  exit "$NOVER_AUDIT_STATUS"
 fi
 printf '%s\n' 'PASS: no protected value found in the audited targets.'
 ```
@@ -147,7 +147,7 @@ Inspect SQLite metadata without selecting `encrypted_secret` or `source_fingerpr
 
 ```bash
 docker compose --env-file relay/.env -f relay/docker-compose.yml exec -T controller \
-  node -e "const{DatabaseSync}=require('node:sqlite');const d=new DatabaseSync('/var/lib/lockard/relay.sqlite',{readOnly:true});console.log(d.prepare('select id,name,state,relay_mode,input_codec,width,height,fps,bitrate_kbps,audio,last_frame_at,error_code,enabled from cameras').all())"
+  node -e "const{DatabaseSync}=require('node:sqlite');const d=new DatabaseSync('/var/lib/nover/relay.sqlite',{readOnly:true});console.log(d.prepare('select id,name,state,relay_mode,input_codec,width,height,fps,bitrate_kbps,audio,last_frame_at,error_code,enabled from cameras').all())"
 ```
 
 The output must contain no source host, IP, port, path, query, username, password, encrypted envelope, or reversible source identifier. Inspect sanitized actor audit rows as a separate query: actor ID, opaque camera ID, operation, result, timestamp, and safe error code only.
