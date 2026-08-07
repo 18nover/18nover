@@ -787,23 +787,25 @@ export default function Dashboard() {
 
         <aside className="companion-sidebar">
           <button className="resize-handle" onPointerDown={beginResize} aria-label="Resize companion sidebar" />
-          <div className="sidebar-tabs" role="tablist" aria-label="Stream companions">
-            {(["chat", "guide", "members"] as SideTab[]).map((tab) => <button key={tab} role="tab" aria-selected={sideTab === tab} onClick={() => setSideTab(tab)}>{tab[0].toUpperCase() + tab.slice(1)}{tab === "members" && <span>{metrics.voiceMembers || "—"}</span>}</button>)}
+          <div className="companion-card">
+            <div className="sidebar-tabs" role="tablist" aria-label="Stream companions">
+              {(["chat", "guide", "members"] as SideTab[]).map((tab) => <button key={tab} role="tab" aria-selected={sideTab === tab} onClick={() => setSideTab(tab)}>{tab[0].toUpperCase() + tab.slice(1)}{tab === "members" && <span>{metrics.voiceMembers || "—"}</span>}</button>)}
+            </div>
+            {sideTab === "chat" && (
+              <ChatPanel
+                composer={composer}
+                setComposer={setComposer}
+                realtimeAvailable={Boolean(session?.realtime)}
+                showToast={showToast}
+                voiceState={voiceState}
+                onJoinVoice={() => void joinVoice()}
+                onVoiceMic={() => void setVoiceMicrophone(voiceState !== "speaking")}
+                onLeaveVoice={() => { pushToTalkHeld.current = false; roomRef.current?.disconnect(); roomRef.current = null; clearVoiceAudioElements(); setVoiceState("idle"); }}
+              />
+            )}
+            {sideTab === "guide" && <GuidePanel realtimeAvailable={Boolean(session?.realtime)} />}
+            {sideTab === "members" && <MembersPanel activeSpeakers={activeSpeakers} voiceMembers={metrics.voiceMembers} realtimeAvailable={Boolean(session?.realtime)} />}
           </div>
-          {sideTab === "chat" && (
-            <ChatPanel
-              composer={composer}
-              setComposer={setComposer}
-              realtimeAvailable={Boolean(session?.realtime)}
-              showToast={showToast}
-              voiceState={voiceState}
-              onJoinVoice={() => void joinVoice()}
-              onVoiceMic={() => void setVoiceMicrophone(voiceState !== "speaking")}
-              onLeaveVoice={() => { pushToTalkHeld.current = false; roomRef.current?.disconnect(); roomRef.current = null; clearVoiceAudioElements(); setVoiceState("idle"); }}
-            />
-          )}
-          {sideTab === "guide" && <GuidePanel realtimeAvailable={Boolean(session?.realtime)} />}
-          {sideTab === "members" && <MembersPanel activeSpeakers={activeSpeakers} voiceMembers={metrics.voiceMembers} realtimeAvailable={Boolean(session?.realtime)} />}
         </aside>
       </section>
 
@@ -829,7 +831,6 @@ function ChatPanel({ composer, setComposer, realtimeAvailable, showToast, voiceS
   return <div className="panel-body chat-panel">
     <div className="panel-status"><span className={realtimeAvailable ? "service-dot online" : "service-dot"} />{realtimeAvailable ? "Realtime credentials ready" : "Realtime service unavailable"}<button aria-label="Chat menu">⋮</button></div>
     <VoiceShell state={voiceState} onJoin={onJoinVoice} onMic={onVoiceMic} onLeave={onLeaveVoice} />
-    {DEV_PREVIEW ? <div className="pinned-message"><span>PINNED</span><strong>Welcome to the driveway stream.</strong><p>Please keep camera locations and access details private.</p></div> : <div className="pinned-message muted"><span>PINNED</span><strong>No pinned announcement</strong><p>Authenticated announcements appear here when the companion feed publishes one.</p></div>}
     <div className="message-list">
       <div className="timeline-label"><span />RECENT ACTIVITY<span /></div>
       {DEV_PREVIEW && CHAT_MESSAGES.map((message) => message.kind === "system" ? <div className="system-message" key={message.id}><span className="system-icon">↗</span><p>{message.text}<small>{message.time}</small></p></div> : <article className="chat-message" key={message.id}><Avatar initials={message.initials} tone={message.name === "Sarah" ? "rose" : "amber"} online /><div><header><strong>{message.name}</strong><span className={`member-badge ${message.badge === "Moderator" ? "moderator" : ""}`}>{message.badge}</span><time>{message.time}</time></header><p>{message.text}</p>{message.reaction && <button className="reaction">{message.reaction}</button>}</div><button className="message-more" aria-label={`More actions for ${message.name}`}>⋮</button></article>)}
