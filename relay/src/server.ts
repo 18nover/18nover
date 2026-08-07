@@ -32,7 +32,7 @@ export function createRelayServer(config: RelayConfig, auth: Authenticator, came
 
       const rawBody = await readBody(request);
       if (!auth.verifyRequest(request.headers, method, url.pathname, rawBody)) return json(response, 401, { error: { code: "INVALID_SIGNATURE", message: "Request authentication failed." } });
-      const keyId = String(request.headers["x-lockard-key-id"] ?? "unknown");
+      const keyId = String(request.headers["x-18nover-key-id"] ?? "unknown");
       if (!limiter.take(`${keyId}:${method}:${routeClass(url.pathname)}`, url.pathname === "/api/v1/sessions" ? 1_200 : url.pathname === "/api/v1/probes" ? 5 : 30)) {
         return json(response, 429, { error: { code: "RATE_LIMITED", message: "Too many requests." } });
       }
