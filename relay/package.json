@@ -1,0 +1,23 @@
+{
+  "name": "@lockard-live/relay-controller",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node --enable-source-maps dist/index.js",
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "jose": "6.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.19",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3"
+  }
+}

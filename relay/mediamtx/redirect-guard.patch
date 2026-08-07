@@ -1,0 +1,55 @@
+diff --git a/internal/staticsources/rtsp/source.go b/internal/staticsources/rtsp/source.go
+index 7e4d9fa..8382d4f 100644
+--- a/internal/staticsources/rtsp/source.go
++++ b/internal/staticsources/rtsp/source.go
+@@ -2,6 +2,7 @@
+ package rtsp
+ 
+ import (
++	"context"
+ 	"fmt"
+ 	"net"
+ 	"net/url"
+@@ -148,6 +149,10 @@ func (s *Source) Run(params defs.StaticSourceRunParams) error {
+ 			s.Log(logger.Debug, "[c->s] %v", req)
+ 		},
+ 		OnResponse: func(res *base.Response) {
++			if res.StatusCode >= base.StatusMovedPermanently && res.StatusCode <= base.StatusUseProxy && len(res.Header["Location"]) != 0 {
++				delete(res.Header, "Location")
++				s.Log(logger.Warn, "rejected RTSP source redirect")
++			}
+ 			s.Log(logger.Debug, "[s->c] %v", res)
+ 		},
+ 		OnTransportSwitch: func(err error) {
+@@ -180,6 +185,20 @@ func (s *Source) Run(params defs.StaticSourceRunParams) error {
+ 		return err
+ 	}
+ 
++	expectedAddr := u.Host
++	baseDial := (&net.Dialer{}).DialContext
++	if s.DumpPackets {
++		baseDial = (&packetdumper.DialContext{
++			Prefix: u.Scheme + "_source_conn",
++		}).Do
++	}
++	c.DialContext = func(ctx context.Context, network string, address string) (net.Conn, error) {
++		if network != "tcp" || address != expectedAddr {
++			return nil, fmt.Errorf("RTSP dial target rejected")
++		}
++		return baseDial(ctx, network, address)
++	}
++
+ 	c.Scheme = u.Scheme
+ 	c.Host = u.Host
+ 
+@@ -190,10 +209,6 @@ func (s *Source) Run(params defs.StaticSourceRunParams) error {
+ 	tlsConfig := ptls.MakeConfig(params.Conf.SourceFingerprint)
+ 
+ 	if s.DumpPackets {
+-		c.DialContext = (&packetdumper.DialContext{
+-			Prefix: u.Scheme + "_source_conn",
+-		}).Do
+-
+ 		c.DialTLSContext = (&packetdumper.DialTLSContext{
+ 			DialContext: c.DialContext,
+ 			TLSConfig:   tlsConfig,
