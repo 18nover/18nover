@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import LockardDashboard from "./lockard-dashboard";
+import Dashboard from "./dashboard";
 
 export const metadata: Metadata = {
-  title: "Lockard Live — Private RTSP streaming",
+  title: "18nover — Private RTSP streaming",
   description: "A private, one-to-many operations dashboard for live RTSP cameras.",
 };
 
 export default function Home() {
-  return <LockardDashboard />;
+  return <Dashboard />;
 }

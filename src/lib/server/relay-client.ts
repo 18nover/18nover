@@ -38,10 +38,10 @@ export async function relayRequest(config: ServerConfig, method: "POST" | "PATCH
       signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
-        "x-lockard-key-id": config.relayKeyId,
-        "x-lockard-timestamp": timestamp,
-        "x-lockard-nonce": nonce,
-        "x-lockard-signature": signature,
+        "x-18nover-key-id": config.relayKeyId,
+        "x-18nover-timestamp": timestamp,
+        "x-18nover-nonce": nonce,
+        "x-18nover-signature": signature,
       },
       body: method === "DELETE" && !rawBody ? undefined : rawBody,
     });

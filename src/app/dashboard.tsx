@@ -27,7 +27,7 @@ type ReconnectRequest = { cameraId: string; profileId: string; attempt: number }
 type ColorTheme = "light" | "dark";
 
 const DEV_PREVIEW = process.env.NODE_ENV !== "production";
-const THEME_STORAGE_KEY = "lockard-live-theme";
+const THEME_STORAGE_KEY = "18nover-theme";
 
 const PREVIEW_CAMERAS: CameraSummary[] = [
   {
@@ -84,7 +84,7 @@ const GUIDE_EVENTS = [
 ] as const;
 
 const MEMBERS = [
-  { name: "Jay Lockard", initials: "JL", role: "Host", status: "In voice", color: "violet", speaking: true },
+  { name: "Jay Ellison", initials: "JE", role: "Host", status: "In voice", color: "violet", speaking: true },
   { name: "Mara Chen", initials: "MC", role: "Moderator", status: "Listening", color: "cyan", speaking: false },
   { name: "Sarah Hale", initials: "SH", role: "Member", status: "In voice", color: "rose", speaking: true },
   { name: "Miles Park", initials: "MP", role: "Member", status: "Online", color: "amber", speaking: false },
@@ -128,10 +128,10 @@ function cameraStateLabel(camera: CameraSummary) {
 }
 
 function clearVoiceAudioElements() {
-  document.querySelectorAll<HTMLMediaElement>("[data-lockard-voice-audio]").forEach((element) => element.remove());
+  document.querySelectorAll<HTMLMediaElement>("[data-nover-voice-audio]").forEach((element) => element.remove());
 }
 
-export default function LockardDashboard() {
+export default function Dashboard() {
   const [session, setSession] = useState<SessionResponse | null>(null);
   const [sessionState, setSessionState] = useState<"loading" | "ready" | "unavailable">("loading");
   const [cameras, setCameras] = useState<CameraSummary[]>(PREVIEW_CAMERAS);
@@ -496,7 +496,7 @@ export default function LockardDashboard() {
         if (track.kind !== Track.Kind.Audio) return;
         const element = track.attach();
         element.autoplay = true;
-        element.dataset.lockardVoiceAudio = "true";
+        element.dataset.noverVoiceAudio = "true";
         element.hidden = true;
         document.body.append(element);
       });
@@ -674,8 +674,8 @@ export default function LockardDashboard() {
     <main className="app-shell" data-theme={colorTheme} style={{ "--sidebar-width": `${sidebarWidth}px` } as React.CSSProperties}>
       <header className="topbar">
         <div className="brand-lockup">
-          <span className="brand-mark">L</span>
-          <span className="wordmark">Lockard <strong>Live</strong></span>
+          <span className="brand-mark">18</span>
+          <span className="wordmark">18nover</span>
           <span className="infra-pill">SELF-HOSTED</span>
         </div>
 
