@@ -1,6 +1,34 @@
-# Lockard Live
+# 18nover
 
-Lockard Live is a private, desktop-first, one-to-many RTSP camera streaming dashboard. Hosts get a VLC-style **Open Network Stream** workflow; viewers receive authenticated WHEP/WebRTC playback and never receive a camera URL or credential.
+18nover is a private, desktop-first, one-to-many RTSP camera streaming dashboard. Hosts get a VLC-style **Open Network Stream** workflow; viewers receive authenticated WHEP/WebRTC playback and never receive a camera URL or credential.
+
+## Project structure
+
+```
+onlystream/
+├── src/                        # ALL application source
+│   ├── app/                    #   Next.js/vinext App Router — pages, layout, API routes, dashboard UI
+│   ├── lib/                    #   Shared library code — no framework routing, imported explicitly
+│   │   └── db/                 #     Drizzle schema.ts + getDb() helper
+│   ├── worker/                 #   Cloudflare Worker entrypoint (index.ts) — this app's deploy glue
+│   └── build/                  #   Custom Vite plugin(s) — build-time tooling
+├── public/                     # Static assets served as-is (og.png)
+├── tests/                      # Integration test(s) (rendered-html.test.mjs)
+├── docs/                       # Human-facing documentation
+│   └── examples/               #   Reference-only scaffolding (e.g. D1 usage example), not part of the build
+├── drizzle/                    # Generated DB migration history (drizzle-kit output)
+├── relay/                      # Independent relay/controller service — own package.json + Docker deploy
+├── .openai/                    # OpenAI Sites hosting platform config — platform-fixed location
+└── package.json, tsconfig.json, vite.config.ts, next.config.ts, eslint.config.mjs,
+    postcss.config.mjs, drizzle.config.ts, pnpm-workspace.yaml, .env.example, .gitignore
+```
+
+- **`src/app` vs `src/lib`** — `app/` is Next.js-routable: the framework auto-discovers pages and API routes by file location. `lib/` is plain code, reachable only via explicit imports. They're kept separate so App Router's file-convention magic never applies to non-route files.
+- **`src/worker` vs `relay/`** — easy to conflate, genuinely different. `src/worker/index.ts` is a small Cloudflare Workers entrypoint for *this app's* deploy. `relay/` is a wholly separate backend service (the RTSP→WebRTC media relay controller) with its own package.json, tests, and Docker Compose deployment, consumed only over HTTP — never imported as code.
+- **`work/` and `outputs/` — deleted.** `work/` was empty and unreferenced anywhere in the repo. `outputs/` was a gitignored leftover from a prior session (duplicate asset, stale status doc, a tarball), not part of the app.
+- **`examples/` moved under `docs/`** — reference-only scaffolding (a D1 usage example, excluded from the real build), not runtime or test code, so it lives with the other documentation now.
+- **`.vinext/` and `.wrangler/`** — not restructured, not part of the tree above. Both are auto-generated, gitignored local caches (vinext's font-optimization cache; Cloudflare Wrangler's dev-server state) that regenerate on `npm run dev`/`build`. Safe to delete by hand anytime; not something to "clean up" as part of this reorg.
+- **Root config files stay at root** — every one of those tools (npm, tsc, vite, eslint, postcss, drizzle-kit) looks for its config at the project root by default.
 
 ## What is implemented
 
@@ -24,7 +52,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-To preview Host controls locally, set the explicit loopback-only `LOCKARD_DEV_*` values in `.env.local` and set `SITES_ORIGIN` to the exact printed local origin. A real session still requires a reachable relay and matching HMAC key.
+To preview Host controls locally, set the explicit loopback-only `NOVER_DEV_*` values in `.env.local` and set `SITES_ORIGIN` to the exact printed local origin. A real session still requires a reachable relay and matching HMAC key.
 
 ## Relay
 
