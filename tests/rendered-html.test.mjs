@@ -13,13 +13,13 @@ async function render(path = "/") {
   );
 }
 
-test("server-renders the Lockard Live broadcast dashboard", async () => {
+test("server-renders the 18nover broadcast dashboard", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>Lockard Live — Private RTSP streaming(?: · Lockard Live)?<\/title>/i);
-  assert.match(html, /Lockard/);
+  assert.match(html, /<title>18nover — Private RTSP streaming(?: · 18nover)?<\/title>/i);
+  assert.match(html, /18nover/i);
   assert.match(html, /Stream status/);
   assert.match(html, /Awaiting a camera feed/);
   assert.match(html, /Add camera/);

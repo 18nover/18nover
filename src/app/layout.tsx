@@ -24,22 +24,22 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Lockard Live",
-    template: "%s · Lockard Live",
+    default: "18nover",
+    template: "%s · 18nover",
   },
   description: "Private, one-to-many RTSP camera streaming through an authenticated WebRTC relay.",
-  applicationName: "Lockard Live",
+  applicationName: "18nover",
   referrer: "no-referrer",
   robots: { index: false, follow: false },
   openGraph: {
-    title: "Lockard Live",
+    title: "18nover",
     description: "Private RTSP cameras, delivered securely through a self-hosted WebRTC relay.",
     type: "website",
-    images: [{ url: "/og.png", width: 1731, height: 909, alt: "Lockard Live private streaming operations dashboard" }],
+    images: [{ url: "/og.png", width: 1731, height: 909, alt: "18nover private streaming operations dashboard" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lockard Live",
+    title: "18nover",
     description: "Private RTSP cameras, delivered securely through a self-hosted WebRTC relay.",
     images: ["/og.png"],
   },

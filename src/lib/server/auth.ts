@@ -34,13 +34,13 @@ export function requireViewer(request: Request, config: ServerConfig): ViewerIde
         : config.memberUserIds.has(userId)
           ? "member"
           : null;
-    if (!role) throw new AccessError(403, "MEMBERSHIP_REQUIRED", "This Sites identity is not a Lockard Live member.");
+    if (!role) throw new AccessError(403, "MEMBERSHIP_REQUIRED", "This Sites identity is not a member of 18nover.");
     return { id: userId, displayName, role };
   }
 
   const dev = getExplicitDevViewer(request);
   if (dev) return dev;
-  throw new AccessError(401, "AUTH_REQUIRED", "Sign in to access Lockard Live.");
+  throw new AccessError(401, "AUTH_REQUIRED", "Sign in to access 18nover.");
 }
 
 export function requireHost(viewer: ViewerIdentity) {
@@ -48,12 +48,12 @@ export function requireHost(viewer: ViewerIdentity) {
 }
 
 function getExplicitDevViewer(request: Request): ViewerIdentity | null {
-  if (process.env.NODE_ENV === "production" || process.env.LOCKARD_DEV_AUTH_ENABLED !== "true") return null;
+  if (process.env.NODE_ENV === "production" || process.env.NOVER_DEV_AUTH_ENABLED !== "true") return null;
   const url = new URL(request.url);
   if (url.hostname !== "localhost" && url.hostname !== "127.0.0.1" && url.hostname !== "[::1]") return null;
-  const id = process.env.LOCKARD_DEV_USER_ID;
-  const name = process.env.LOCKARD_DEV_USER_NAME;
-  const role = process.env.LOCKARD_DEV_USER_ROLE;
+  const id = process.env.NOVER_DEV_USER_ID;
+  const name = process.env.NOVER_DEV_USER_NAME;
+  const role = process.env.NOVER_DEV_USER_ROLE;
   if (!id || !name || (role !== "host" && role !== "member" && role !== "moderator")) return null;
   return { id, displayName: name, role };
 }
