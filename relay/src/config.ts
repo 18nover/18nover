@@ -48,7 +48,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RelayConfig {
 
   return {
     port: integer(env.PORT ?? "8080", 1, 65535),
-    dbPath: resolve(env.RELAY_DB_PATH ?? "/var/lib/lockard/relay.sqlite"),
+    dbPath: resolve(env.RELAY_DB_PATH ?? "/var/lib/nover/relay.sqlite"),
     masterKey,
     hmacKeys,
     jwtPrivateKeyPem: readFileSync(required(env, "RELAY_JWT_PRIVATE_KEY_FILE"), "utf8"),

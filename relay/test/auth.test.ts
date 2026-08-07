@@ -10,7 +10,7 @@ import type { RelayConfig } from "../src/config.js";
 import { RelayDatabase } from "../src/db.js";
 
 function fixture() {
-  const directory = mkdtempSync(join(tmpdir(), "lockard-auth-test-"));
+  const directory = mkdtempSync(join(tmpdir(), "18nover-auth-test-"));
   const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
   const hmacKey = randomBytes(32);
   const config: RelayConfig = {
@@ -22,7 +22,7 @@ function fixture() {
     jwtIssuer: "https://stream.example.com",
     jwtAudience: "mediamtx",
     publicOrigin: "https://stream.example.com",
-    sitesOrigin: "https://lockard.example.com",
+    sitesOrigin: "https://18nover.example.com",
     mediaApiOrigin: "http://mediamtx:9997",
     mediaRtspOrigin: "rtsp://mediamtx:8554",
     mediaWhepOrigin: "http://mediamtx:8889",
@@ -44,10 +44,10 @@ function signedHeaders(key: Buffer, method: string, path: string, body: string, 
   const digest = createHash("sha256").update(body).digest("hex");
   const canonical = `v1\n${timestamp}\n${nonce}\n${method}\n${path}\n${digest}`;
   return {
-    "x-lockard-key-id": "sites-v1",
-    "x-lockard-timestamp": timestamp,
-    "x-lockard-nonce": nonce,
-    "x-lockard-signature": createHmac("sha256", key).update(canonical).digest("base64url"),
+    "x-18nover-key-id": "sites-v1",
+    "x-18nover-timestamp": timestamp,
+    "x-18nover-nonce": nonce,
+    "x-18nover-signature": createHmac("sha256", key).update(canonical).digest("base64url"),
   };
 }
 

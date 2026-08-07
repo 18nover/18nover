@@ -9,7 +9,7 @@ import { RelayDatabase, toSummary } from "../src/db.js";
 import type { CameraRecord } from "../src/types.js";
 
 test("HMAC nonces can be reserved exactly once inside the replay window", () => {
-  const directory = mkdtempSync(join(tmpdir(), "lockard-relay-test-"));
+  const directory = mkdtempSync(join(tmpdir(), "18nover-relay-test-"));
   const db = new RelayDatabase(join(directory, "test.sqlite"));
   try {
     const expires = Math.floor(Date.now() / 1000) + 35;
@@ -22,7 +22,7 @@ test("HMAC nonces can be reserved exactly once inside the replay window", () => 
 });
 
 test("camera restart metadata persists without plaintext source material and summaries strip internal paths", () => {
-  const directory = mkdtempSync(join(tmpdir(), "lockard-relay-test-"));
+  const directory = mkdtempSync(join(tmpdir(), "18nover-relay-test-"));
   const path = join(directory, "test.sqlite");
   const db = new RelayDatabase(path);
   const key = randomBytes(32);

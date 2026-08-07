@@ -1,4 +1,4 @@
-name: lockard-live-relay
+name: 18nover-relay
 
 services:
   caddy:
@@ -37,7 +37,7 @@ services:
         condition: service_healthy
 
   mediamtx:
-    image: lockard-mediamtx:1.19.3-redirect-guard
+    image: 18nover-mediamtx:1.19.3-redirect-guard
     build:
       context: ./mediamtx
       dockerfile: Dockerfile
@@ -91,14 +91,14 @@ services:
     tmpfs:
       - /tmp:size=128m,mode=1777
     volumes:
-      - relay_data:/var/lib/lockard
+      - relay_data:/var/lib/nover
     secrets:
       - db_master_key
       - relay_hmac_keys
       - relay_jwt_private_key
     environment:
       PORT: "8080"
-      RELAY_DB_PATH: /var/lib/lockard/relay.sqlite
+      RELAY_DB_PATH: /var/lib/nover/relay.sqlite
       RELAY_DB_MASTER_KEY_FILE: /run/secrets/db_master_key
       RELAY_HMAC_KEYS_FILE: /run/secrets/relay_hmac_keys
       RELAY_JWT_PRIVATE_KEY_FILE: /run/secrets/relay_jwt_private_key

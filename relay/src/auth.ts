@@ -24,10 +24,10 @@ export class Authenticator {
   }
 
   verifyRequest(headers: IncomingHttpHeaders, method: string, path: string, rawBody: string) {
-    const keyId = single(headers["x-lockard-key-id"]);
-    const timestamp = single(headers["x-lockard-timestamp"]);
-    const nonce = single(headers["x-lockard-nonce"]);
-    const signature = single(headers["x-lockard-signature"]);
+    const keyId = single(headers["x-18nover-key-id"]);
+    const timestamp = single(headers["x-18nover-timestamp"]);
+    const nonce = single(headers["x-18nover-nonce"]);
+    const signature = single(headers["x-18nover-signature"]);
     if (!keyId || !timestamp || !nonce || !signature || !/^[A-Za-z0-9_-]{22}$/.test(nonce)) return false;
     const key = this.config.hmacKeys.get(keyId);
     const seconds = Number(timestamp);
