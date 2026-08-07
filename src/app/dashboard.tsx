@@ -647,17 +647,6 @@ export default function Dashboard() {
     return profiles.length > 1 ? [{ value: "auto", label: "Auto" }, ...profiles] : profiles;
   }, [activeCamera]);
 
-  const statusCards = [
-    { label: "Viewers", value: String(metrics.viewers), note: isLive ? "watching now" : "relay idle", accent: "violet" },
-    { label: "Voice members", value: String(metrics.voiceMembers), note: voiceState === "idle" ? "not connected" : "room connected", accent: "green" },
-    { label: "Current camera", value: activeCamera?.name ?? "—", note: activeCamera ? cameraStateLabel(activeCamera) : "none", accent: "cyan" },
-    { label: "Bitrate", value: safeNumber(metrics.bitrateMbps, " Mbps"), note: activeCamera?.relayMode === "transcoded" ? "transcoded" : "source", accent: "violet" },
-    { label: "Latency", value: safeNumber(metrics.latencySeconds, " sec"), note: isLive ? "WebRTC" : "no session", accent: "cyan" },
-    { label: "FPS", value: safeNumber(metrics.fps), note: activeCamera?.inputCodec?.toUpperCase() ?? "not detected", accent: "green" },
-    { label: "CPU", value: safeNumber(metrics.cpuPercent, "%"), note: "relay host", accent: "violet" },
-    { label: "Network", value: metrics.network[0].toUpperCase() + metrics.network.slice(1), note: sessionState === "ready" ? "control plane" : "unavailable", accent: metrics.network === "healthy" ? "green" : "amber" },
-  ];
-
   const toggleColorTheme = () => {
     setColorTheme((current) => {
       const next = current === "light" ? "dark" : "light";
@@ -719,27 +708,6 @@ export default function Dashboard() {
       </header>
 
       <section className="dashboard-grid">
-        <aside className="status-rail" aria-label="Stream status">
-          <div className="rail-heading">
-            <div><span className="eyebrow">OPERATIONS</span><h2>Stream status</h2></div>
-            <button className="quiet-icon tooltip" data-tooltip="More stream actions" aria-label="More stream actions">⋮</button>
-          </div>
-          <div className="stat-grid">
-            {statusCards.map((card) => (
-              <article className="stat-card" key={card.label}>
-                <span className={`stat-accent ${card.accent}`} />
-                <span>{card.label}</span>
-                <strong className={card.value.length > 11 ? "compact" : ""}>{card.value}</strong>
-                <small>{card.note}</small>
-              </article>
-            ))}
-          </div>
-          <div className="rail-notice">
-            <span className="notice-icon">⌁</span>
-            <div><strong>Private broadcast</strong><p>RTSP sources stay inside your relay. Viewers receive short-lived WebRTC access only.</p></div>
-          </div>
-        </aside>
-
         <section className="stage-column">
           <div className={`video-stage ${pendingCameraId ? "is-connecting" : ""}`}>
             <video ref={(node) => { videoRefs.current[0] = node; }} className={`stage-video ${activeSlot === 0 ? "visible" : ""}`} playsInline autoPlay muted={!audioEnabled} />
@@ -820,13 +788,22 @@ export default function Dashboard() {
           <div className="sidebar-tabs" role="tablist" aria-label="Stream companions">
             {(["chat", "guide", "members"] as SideTab[]).map((tab) => <button key={tab} role="tab" aria-selected={sideTab === tab} onClick={() => setSideTab(tab)}>{tab[0].toUpperCase() + tab.slice(1)}{tab === "members" && <span>{metrics.voiceMembers || "—"}</span>}</button>)}
           </div>
-          {sideTab === "chat" && <ChatPanel composer={composer} setComposer={setComposer} realtimeAvailable={Boolean(session?.realtime)} showToast={showToast} />}
+          {sideTab === "chat" && (
+            <ChatPanel
+              composer={composer}
+              setComposer={setComposer}
+              realtimeAvailable={Boolean(session?.realtime)}
+              showToast={showToast}
+              voiceState={voiceState}
+              onJoinVoice={() => void joinVoice()}
+              onVoiceMic={() => void setVoiceMicrophone(voiceState !== "speaking")}
+              onLeaveVoice={() => { pushToTalkHeld.current = false; roomRef.current?.disconnect(); roomRef.current = null; clearVoiceAudioElements(); setVoiceState("idle"); }}
+            />
+          )}
           {sideTab === "guide" && <GuidePanel realtimeAvailable={Boolean(session?.realtime)} />}
           {sideTab === "members" && <MembersPanel activeSpeakers={activeSpeakers} voiceMembers={metrics.voiceMembers} realtimeAvailable={Boolean(session?.realtime)} />}
         </aside>
       </section>
-
-      <VoiceFooter state={voiceState} activeSpeakers={activeSpeakers} onJoin={() => void joinVoice()} onMic={() => void setVoiceMicrophone(voiceState !== "speaking")} onLeave={() => { pushToTalkHeld.current = false; roomRef.current?.disconnect(); roomRef.current = null; clearVoiceAudioElements(); setVoiceState("idle"); }} />
 
       {sheetOpen && <AddCameraSheet camera={editingCamera} onClose={() => { setSheetOpen(false); setEditingCamera(null); }} onSaved={(camera) => { setCameras((current) => [...current.filter((entry) => entry.id !== camera.id), camera]); setSheetOpen(false); setEditingCamera(null); showToast(editingCamera ? `${camera.name} updated` : `${camera.name} added`, "The relay is preparing its browser rendition.", "success"); }} showToast={showToast} />}
       {deleteTarget && <ConfirmDelete camera={deleteTarget} onCancel={() => setDeleteTarget(null)} onConfirm={() => deleteCamera(deleteTarget)} />}
@@ -840,7 +817,7 @@ function Avatar({ initials: value, tone, online = false, speaking = false }: { i
   return <span className={`avatar ${tone} ${speaking ? "speaking" : ""}`}><span>{value}</span>{online && <i className="presence-dot" />}</span>;
 }
 
-function ChatPanel({ composer, setComposer, realtimeAvailable, showToast }: { composer: string; setComposer: (value: string) => void; realtimeAvailable: boolean; showToast: (title: string, detail?: string) => void }) {
+function ChatPanel({ composer, setComposer, realtimeAvailable, showToast, voiceState, onJoinVoice, onVoiceMic, onLeaveVoice }: { composer: string; setComposer: (value: string) => void; realtimeAvailable: boolean; showToast: (title: string, detail?: string) => void; voiceState: VoiceState; onJoinVoice: () => void; onVoiceMic: () => void; onLeaveVoice: () => void }) {
   function send(event: FormEvent) {
     event.preventDefault();
     if (!composer.trim()) return;
@@ -849,6 +826,7 @@ function ChatPanel({ composer, setComposer, realtimeAvailable, showToast }: { co
   }
   return <div className="panel-body chat-panel">
     <div className="panel-status"><span className={realtimeAvailable ? "service-dot online" : "service-dot"} />{realtimeAvailable ? "Realtime credentials ready" : "Realtime service unavailable"}<button aria-label="Chat menu">⋮</button></div>
+    <VoiceShell state={voiceState} onJoin={onJoinVoice} onMic={onVoiceMic} onLeave={onLeaveVoice} />
     {DEV_PREVIEW ? <div className="pinned-message"><span>PINNED</span><strong>Welcome to the driveway stream.</strong><p>Please keep camera locations and access details private.</p></div> : <div className="pinned-message muted"><span>PINNED</span><strong>No pinned announcement</strong><p>Authenticated announcements appear here when the companion feed publishes one.</p></div>}
     <div className="message-list">
       <div className="timeline-label"><span />RECENT ACTIVITY<span /></div>
@@ -881,14 +859,23 @@ function MembersPanel({ activeSpeakers, voiceMembers, realtimeAvailable }: { act
   </div>;
 }
 
-function VoiceFooter({ state, activeSpeakers, onJoin, onMic, onLeave }: { state: VoiceState; activeSpeakers: string[]; onJoin: () => void; onMic: () => void; onLeave: () => void }) {
+function VoiceShell({ state, onJoin, onMic, onLeave }: { state: VoiceState; onJoin: () => void; onMic: () => void; onLeave: () => void }) {
   const connected = state !== "idle" && state !== "connecting";
-  const speakerTones = ["violet", "rose", "cyan"];
-  return <footer className="voice-footer">
-    <div className="voice-brand"><span className="voice-wave"><i /><i /><i /><i /></span><div><strong>Voice lounge</strong><small>{state === "idle" ? "Optional audio companion" : state === "connecting" ? "Connecting securely…" : state === "speaking" ? "You are speaking" : "Connected · microphone muted"}</small></div></div>
-    <div className="voice-participants"><div className="avatar-stack">{activeSpeakers.slice(0, 3).map((name, index) => <Avatar key={name} initials={initials(name)} tone={speakerTones[index]!} speaking />)}</div><span>{connected ? `${activeSpeakers.length} member${activeSpeakers.length === 1 ? "" : "s"} talking` : "Voice not joined"}</span></div>
-    <div className="voice-actions">{connected && <span className="push-hint">Hold <kbd>V</kbd> to talk</span>}{!connected ? <button className="voice-join" onClick={onJoin} disabled={state === "connecting"}>{state === "connecting" ? "Connecting…" : "Join voice"}</button> : <><button className={`voice-mic ${state === "speaking" ? "active" : ""}`} onClick={onMic}>{state === "speaking" ? "Mic on" : "Muted"}</button><button className="voice-leave" onClick={onLeave} aria-label="Leave voice">×</button></>}</div>
-  </footer>;
+  return <div className="voice-shell">
+    <span className="voice-wave"><i /><i /><i /><i /></span>
+    <div className="voice-shell-copy">
+      <strong>Voice</strong>
+      <small>{state === "idle" ? "Not connected" : state === "connecting" ? "Connecting securely…" : state === "speaking" ? "You are speaking" : "Connected · microphone muted"}</small>
+    </div>
+    <div className="voice-shell-actions">
+      {!connected
+        ? <button className="voice-join" onClick={onJoin} disabled={state === "connecting"}>{state === "connecting" ? "Connecting…" : "Join voice"}</button>
+        : <>
+          <button className={`voice-mic ${state === "speaking" ? "active" : ""}`} onClick={onMic}>{state === "speaking" ? "Mic on" : "Muted"}</button>
+          <button className="voice-leave" onClick={onLeave} aria-label="Leave voice">×</button>
+        </>}
+    </div>
+  </div>;
 }
 
 function AddCameraSheet({ camera, onClose, onSaved, showToast }: { camera: CameraSummary | null; onClose: () => void; onSaved: (camera: CameraSummary) => void; showToast: (title: string, detail?: string, tone?: Toast["tone"]) => void }) {

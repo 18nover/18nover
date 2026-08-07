@@ -20,13 +20,12 @@ test("server-renders the 18nover broadcast dashboard", async () => {
   const html = await response.text();
   assert.match(html, /<title>18nover — Private RTSP streaming(?: · 18nover)?<\/title>/i);
   assert.match(html, /18nover/i);
-  assert.match(html, /Stream status/);
   assert.match(html, /Awaiting a camera feed/);
   assert.match(html, /Add camera/);
   assert.match(html, /Host only/);
   assert.match(html, /Chat/);
   assert.match(html, /Guide/);
-  assert.match(html, /Voice lounge/);
+  assert.match(html, /Join voice/);
   assert.match(html, /data-theme="light"/i);
   assert.match(html, /aria-label="Switch to dark mode"/i);
   assert.match(html, /data-stream-clock="true">--:--:--</i);
