@@ -470,6 +470,7 @@ kbd {
 .sidebar-tabs button span { display: grid; min-width: 16px; height: 16px; place-items: center; border-radius: 99px; background: #222936; color: #8d98a8; font-family: var(--font-mono); font-size: 14px; }
 
 .panel-body { min-height: 0; overflow: auto; scrollbar-width: thin; }
+.chat-panel { display: flex; flex-direction: column; overflow: hidden; }
 .panel-status { position: sticky; z-index: 2; top: 0; height: 35px; gap: 7px; padding: 0 14px; border-bottom: 1px solid var(--line-soft); background: rgba(14, 18, 24, 0.94); color: #687587; font-family: var(--font-mono); font-size: 14px; backdrop-filter: blur(12px); }
 .panel-status button { margin-left: auto; background: transparent; color: #626e7e; }
 
@@ -480,7 +481,7 @@ kbd {
 .voice-shell-actions { display: flex; align-items: center; gap: 6px; }
 .service-dot { width: 6px; height: 6px; border-radius: 50%; background: #697484; }
 .service-dot.online { background: var(--green); }
-.message-list { padding: 12px; }
+.message-list { flex: 1; min-height: 0; overflow: auto; padding: 12px; scrollbar-width: thin; }
 .timeline-label { display: flex; align-items: center; gap: 8px; margin: 15px 0 8px; color: #525e6f; font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.1em; }
 .timeline-label span { height: 1px; flex: 1; background: #202733; }
 .system-message { display: flex; align-items: center; gap: 8px; margin: 9px 3px; }
