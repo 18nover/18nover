@@ -2,6 +2,30 @@
 
 All dates are 2026-08-05 unless noted otherwise.
 
+## 2026-08-09 — First real relay boot, controller boot-blocking bug fix
+
+### Added
+
+- Companion sidebar collapse toggle: a chevron button by the resize handle that zeros `--sidebar-width`, animated with a 220ms `grid-template-columns` transition, styled for both themes and hidden on the mobile breakpoint.
+- `relay/test/config.test.ts`: `loadConfig()` had zero prior test coverage. Now covers the exact `MEDIAMTX_*_ORIGIN` values `docker-compose.yml` sets, a rejected non-root internal-origin path, and a rejected non-HTTPS Sites origin.
+
+### Fixed
+
+- `relay/src/config.ts`'s `internalOrigin()` required `url.pathname === "/"` for every internal media origin, but `rtsp://mediamtx:8554` — the literal `MEDIAMTX_RTSP_ORIGIN` value `docker-compose.yml` sets — parses to pathname `""` under WHATWG URL rules, since `rtsp:` isn't a "special" scheme that gets normalized to `/`. This meant the controller could never boot with the shipped compose file, on any host. Now accepts both `""` and `/` as "no path."
+- `docs/deployment-operations.md`'s secret-generation commands specified `chmod 600 relay/secrets/*`. Docker Compose's non-Swarm file secrets bind-mount the host file's own permission bits into the container as-is; the controller/MediaMTX containers run as fixed non-root `uid 10001`, which can never read a mode-0600 file owned by whatever host account generated it. Changed to `chmod 644` (the containing `relay/secrets/` directory stays mode-0700).
+
+### Verified
+
+- First-ever local build and boot of the real relay stack in this repo's history (`docs/HANDOFF.md` had "Docker daemon/server was unavailable" and "custom MediaMTX image has not been built or run" as open items). Built `18nover-mediamtx:1.19.3-redirect-guard` from the exact pinned upstream commit with the redirect-guard patch applied (the Dockerfile's own commit-hash assertion passed), built the controller image, and — after the two fixes above — got the controller to `controller_ready`/`healthy`.
+- Ran a real HMAC-signed `POST /api/v1/probes` against a live public Wowza RTSP test stream (not a fixture): confirmed the port-allowlist gate rejects it under the default `554,8554` policy, then confirmed a real successful probe after widening the allowlist for that test only — real DNS pinning, real TCP connect, real `ffprobe` codec detection (H.264 Main, B-frames, 854x480@30fps), correct `transcoded` decision.
+- Sites app: lint, typecheck, build, and all 3 rendered-HTML tests pass. Relay: typecheck and 19/19 tests pass (16 prior + 3 new).
+- Clarified how Sites publishing actually works: candidate versions, env vars/secrets, and audience allowlists are managed through the ChatGPT web/desktop app's Sites panel, not a CLI in this repo.
+
+### Not verified
+
+- None of the above ran on the operator's actual production Linux host — only in a local sandbox (nested Docker Desktop under WSL2), which also showed unusually slow cross-container network latency (10-20s for calls that should be near-instant) that may or may not reproduce on a real host; flagged in `docs/HANDOFF.md` to watch for, not assumed fixed.
+- The operator's real camera (at home, not available this session), real DNS/TLS, real WHEP/browser playback, 12-viewer capacity, backup/restore, and the fail-closed credential-leak audit remain open per `docs/deployment-operations.md`'s production audience gate.
+
 ## Workspace relocation
 
 - Moved the canonical project from the generated Codex workspace to `C:\18nover\onlystream` (WSL: `/mnt/c/18nover/onlystream`), nested under the `C:\18nover` company directory.

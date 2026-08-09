@@ -1,7 +1,7 @@
 # 18nover — AI handoff
 
-Updated: 2026-08-05  
-Workspace: `C:\18nover\onlystream` (WSL: `/mnt/c/18nover/onlystream`)
+Updated: 2026-08-09  
+Workspace: `/home/jerry/18nover/18nover.gay` (native Linux, fully tracked by git; the `C:\18nover\onlystream` Windows path and low-disk workaround described further below is historical and no longer applies)
 
 ## Current outcome
 
@@ -118,10 +118,14 @@ Passed:
 - SSR stream clock is `--:--:--` before hydration.
 - Local `/og.png` returns HTTP 200 as `image/png`.
 - Relay TypeScript and emitted build.
-- Relay tests: 16/16.
+- Relay tests: 19/19 (16 prior + 3 new `config.test.ts` cases).
 - Docker Compose configuration render with the example environment.
 - MediaMTX patch dry-run against the exact pinned commit.
 - Source archive extraction and non-fixture credential-shape scan.
+- 2026-08-09: Docker was available in-session this time. Built the real `18nover-mediamtx:1.19.3-redirect-guard` image (exact-commit checkout assertion in the Dockerfile passed) and the controller image, brought both up locally, and found the controller could not boot at all: `relay/src/config.ts`'s `internalOrigin()` required `url.pathname === "/"`, but `rtsp://mediamtx:8554` (the literal value `docker-compose.yml` sets for `MEDIAMTX_RTSP_ORIGIN`) parses to pathname `""` under WHATWG URL rules because `rtsp:` isn't a "special" scheme. This was a hard, host-independent boot blocker with zero prior test coverage. Fixed in `relay/src/config.ts` (accepts `""` or `"/"` as "no path") and covered by the new `relay/test/config.test.ts`. After the fix, the controller reached `controller_ready` and reported `healthy`.
+- 2026-08-09: Also hit and worked around a local-only issue: Docker Compose's non-Swarm file secrets bind-mount the host file's own permission bits into the container; the documented `chmod 600 relay/secrets/*` is unreadable by the containers' fixed non-root `uid 10001` on any host. `docs/deployment-operations.md` now specifies `chmod 644` instead.
+- 2026-08-09: With the fix applied, ran a real HMAC-signed `POST /api/v1/probes` against a live public Wowza RTSP test stream (`rtsp://.../app-p5260J38/...`, not a fixture). Confirmed the port-allowlist gate correctly rejects it on the default `554,8554` policy (its port is 1935), then confirmed a real successful probe after widening `RELAY_ALLOWED_CAMERA_PORTS` for that test only: real DNS pinning, real TCP RTSP connect, real `ffprobe` codec detection (H.264 Main, B-frames present, 854x480@30fps), and a correct `transcoded` mode decision. This exercised `network.ts` and `probe.ts` against genuine external traffic, not mocks.
+- 2026-08-09: MediaMTX's own Docker healthcheck (`wget` against its Control API, 3s timeout) reported `unhealthy` throughout local testing even though the API was independently confirmed correct (proper `401` on unauthenticated calls, matching its JWT-auth wiring). Cross-container HTTP calls in this particular sandbox (nested Docker Desktop under WSL2) measured 10-20s for what should be a sub-millisecond loopback-adjacent call; a `docker run --network ... curl` test against the same endpoint independently reproduced ~19s response time. This looked like sandbox-specific container networking overhead, not an application defect, but has not been confirmed absent on a real dedicated Linux Docker host — watch this on first real bring-up and treat a repeat as a real finding, not an assumed artifact.
 
 Useful checks after changing the UI:
 
@@ -144,7 +148,9 @@ npm run build
 docker compose --env-file .env.example -f docker-compose.yml config --quiet
 ```
 
-## Critical workspace warning
+## Critical workspace warning (historical, resolved)
+
+The paragraphs below described a 2026-08-05 low-disk-space incident on a Windows-hosted workspace at `C:\18nover\onlystream`. As of 2026-08-09 the canonical workspace is a normal, fully tracked git repository at `/home/jerry/18nover/18nover.gay` on native Linux with a real `origin` remote (`github.com/18nover/18nover.gay`) — none of the `/tmp` symlink workarounds or disk-space constraints described below apply anymore. Left in place only as history in case anything references the old paths.
 
 The canonical project was moved to `C:\18nover\onlystream` on 2026-08-05, nested under the `18nover` company directory. The former generated Codex workspace directory was emptied, but Windows may keep that empty directory locked until the original Codex task closes. Do not treat the former path as another project copy.
 
@@ -163,7 +169,9 @@ Node runtime -> /tmp/18nover-node-runtime/node-v24.19.0-linux-x64
 
 These `/tmp` paths are ephemeral. Free substantial Windows disk space before reinstalling dependencies, building Docker images, or assuming the setup will survive a WSL/reboot boundary. Do not delete source directories to make space. In particular, do not delete `src/build/`; it contains required source.
 
-## Worktree state
+## Worktree state (historical, resolved)
+
+This described an earlier state where application files were untracked (`??`). As of 2026-08-09 the repository is a normal tracked git history on `main` with a GitHub `origin` remote; this section no longer describes the current repo.
 
 The repository currently shows the application files as untracked (`??`) because this workspace began as a generated project without an established tracked baseline. Treat all visible source as intentional user work. Do not run reset, checkout, clean, or broad deletion commands.
 
@@ -171,33 +179,31 @@ Generated runtime symlinks and deliverables are ignored. Inspect exact file name
 
 ## Not verified and not shipped
 
-- Docker daemon/server was unavailable here; only Docker client 29.7.1 was present.
-- The custom MediaMTX image has not been built or run on the target host.
-- No real RTSP/RTSPS source, public stream hostname, or production Sites identity list was supplied.
-- Real camera probe/playback, WHEP/ICE, RTSPS, redirect-negative, 12-viewer capacity, restart rehydration, backup/restore, and credential-leak acceptance remain deployment gates.
-- The updated site has not been published.
+- The custom MediaMTX image and the controller image have been built and booted successfully, but only locally in a sandbox (nested Docker Desktop/WSL2), never yet on the real target production host.
+- No real RTSP/RTSPS source, public stream hostname, or production Sites identity list has been supplied yet. The operator has a real camera, but it's at home and wasn't reachable this session; a real Linux Docker host is reportedly ready but connection details haven't been shared yet either.
+- Real camera **playback** (WHEP/ICE through a browser), RTSPS, redirect-negative, 12-viewer capacity, restart rehydration, backup/restore, and credential-leak acceptance remain deployment gates. (Real camera **probe** — SSRF/port-allowlist gate plus `ffprobe` codec detection — was exercised successfully against a live public test stream; see Latest verification above. That is not a substitute for the real-camera gate in `docs/deployment-operations.md`, which must run against the operator's actual camera from the actual production origin.)
+- The updated site has not been published. How Sites publishing actually works was clarified this session: candidate versions, env vars/secrets, and the audience allowlist are all managed through the ChatGPT web/desktop app's Sites panel — there is no CLI/API for it in this repo. The `NOVER_*`/`SITES_ORIGIN`/relay HMAC env var table in `docs/deployment-operations.md` is what to paste into that panel.
 
 Do not describe those items as complete.
 
 ## Inputs still required
 
-1. Linux Docker host connection.
+1. Linux Docker host connection details (operator says a host is ready, but hasn't shared SSH/access details in-session yet).
 2. Public stream hostname and DNS/TLS control.
 3. TCP 80/443 and UDP/TCP 8189 reachability.
-4. Public RTSP/RTSPS camera URL and read-only credentials.
+4. The operator's real RTSP/RTSPS camera and read-only credentials (exists, at home, not available this session).
 5. Stable Sites Host, Moderator, and Member user IDs.
 6. Existing authenticated realtime WebSocket and audio-only LiveKit integration details if those companions must be live.
 
 ## Recommended next actions
 
-1. Free at least several gigabytes on `C:` and confirm durable dependencies can be restored.
-2. Preserve the hydration regression test and light-first theme behavior.
-3. On the selected Docker host, create secrets from the deployment runbook and build the custom MediaMTX image.
-4. Run the redirect, pinned-destination, RTSPS, and container-isolation tests.
-5. Add one real read-only camera and validate Direct or Transcoded playback.
-6. Deploy an access-restricted Sites candidate for named operators only.
-7. Run WHEP lifecycle, two-camera/12-viewer capacity, rollback, and credential-leak gates.
-8. Widen access only after every gate passes.
+1. Preserve the hydration regression test and light-first theme behavior.
+2. Get SSH/access details for the operator's real Linux Docker host, then run the (now-fixed) deployment runbook there: create secrets with the corrected `chmod 644` step, build the custom MediaMTX image, bring up the full stack including Caddy/TLS, and confirm `/healthz` and `/readyz` from outside the host.
+3. Run the redirect, pinned-destination, RTSPS, and container-isolation tests on that real host.
+4. When the operator's real camera is available at home, add it and validate Direct or Transcoded playback end to end (not just the probe step already exercised against a public test stream).
+5. Deploy an access-restricted Sites candidate through the ChatGPT Sites panel for named operators only, using the env var table in `docs/deployment-operations.md`.
+6. Run WHEP lifecycle, two-camera/12-viewer capacity, rollback, and credential-leak gates.
+7. Widen access only after every gate passes.
 
 ## UI follow-up ideas
 

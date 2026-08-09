@@ -37,15 +37,15 @@ Treat that MediaMTX image as a maintained security fork. A future MediaMTX upgra
 
 Copy `relay/.env.example` to `relay/.env` and replace both hostnames. `SITES_ORIGIN` must exactly match the access-restricted candidate origin during integration.
 
-Run from the repository root on the Linux Docker host. These commands write secrets directly to mode-0600 files and do not print them:
+Run from the repository root on the Linux Docker host. The containing directory stays mode-0700 (host-user-only), but the secret files themselves must end mode-0644: Compose's non-Swarm file secrets bind-mount the host file's own owner and permission bits straight into the container rather than remapping them, and the controller/MediaMTX containers run as their own fixed non-root uid `10001`, which will never match the host user that generates these files. A mode-0600 secret is therefore unreadable by the container that needs it, on any host:
 
 ```bash
 install -d -m 700 relay/secrets
-umask 077
+umask 022
 openssl rand -base64 32 > relay/secrets/db_master_key
-node -e "const fs=require('node:fs'),c=require('node:crypto');fs.writeFileSync('relay/secrets/relay_hmac_keys.json',JSON.stringify({'sites-v1':c.randomBytes(32).toString('base64')}),{mode:0o600})"
+node -e "const fs=require('node:fs'),c=require('node:crypto');fs.writeFileSync('relay/secrets/relay_hmac_keys.json',JSON.stringify({'sites-v1':c.randomBytes(32).toString('base64')}),{mode:0o644})"
 openssl ecparam -name prime256v1 -genkey -noout | openssl pkcs8 -topk8 -nocrypt -out relay/secrets/relay_jwt_private_key.pem
-chmod 600 relay/secrets/*
+chmod 644 relay/secrets/*
 ```
 
 Copy the `sites-v1` HMAC value to the Sites secret environment variable through the Sites environment UI/API. Do not paste it into shell history, repository files, issues, chat, or deployment logs. The database master key and ES256 private key stay only on the Docker host.
