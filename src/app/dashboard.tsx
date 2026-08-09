@@ -142,6 +142,7 @@ export default function Dashboard() {
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [sideTab, setSideTab] = useState<SideTab>("chat");
   const [sidebarWidth, setSidebarWidth] = useState(384);
+  const [companionCollapsed, setCompanionCollapsed] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingCamera, setEditingCamera] = useState<CameraSummary | null>(null);
   const [cameraMenuId, setCameraMenuId] = useState<string | null>(null);
@@ -660,7 +661,7 @@ export default function Dashboard() {
   };
 
   return (
-    <main className="app-shell" data-theme={colorTheme} style={{ "--sidebar-width": `${sidebarWidth}px` } as React.CSSProperties}>
+    <main className="app-shell" data-theme={colorTheme} data-companion-collapsed={companionCollapsed} style={{ "--sidebar-width": `${companionCollapsed ? 0 : sidebarWidth}px` } as React.CSSProperties}>
       <header className="topbar">
         <div className="brand-lockup">
           <span className="brand-mark">18</span>
@@ -787,6 +788,14 @@ export default function Dashboard() {
 
         <aside className="companion-sidebar">
           <button className="resize-handle" onPointerDown={beginResize} aria-label="Resize companion sidebar" />
+          <button
+            className="panel-collapse-toggle"
+            onClick={() => setCompanionCollapsed((collapsed) => !collapsed)}
+            aria-label={companionCollapsed ? "Show companion panel" : "Hide companion panel"}
+            aria-pressed={companionCollapsed}
+          >
+            <span aria-hidden="true">{companionCollapsed ? "‹" : "›"}</span>
+          </button>
           <div className="companion-card">
             <div className="sidebar-tabs" role="tablist" aria-label="Stream companions">
               {(["chat", "guide", "members"] as SideTab[]).map((tab) => <button key={tab} role="tab" aria-selected={sideTab === tab} onClick={() => setSideTab(tab)}>{tab[0].toUpperCase() + tab.slice(1)}{tab === "members" && <span>{metrics.voiceMembers || "—"}</span>}</button>)}

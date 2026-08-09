@@ -324,6 +324,7 @@ kbd {
   min-width: 0;
   min-height: 0;
   grid-template-columns: 220px minmax(560px, 1fr) var(--sidebar-width);
+  transition: grid-template-columns 220ms ease;
   overflow: hidden;
 }
 
@@ -462,6 +463,10 @@ kbd {
 .companion-card { position: relative; display: grid; flex: 1; min-width: 0; min-height: 0; grid-template-rows: 53px minmax(0, 1fr); margin: 12px; border: 1px solid #080b10; border-radius: 14px; background: #151a24; overflow: hidden; box-shadow: inset 0 1px rgba(255, 255, 255, 0.02), 0 6px 16px rgba(0, 0, 0, 0.12); }
 .resize-handle { position: absolute; z-index: 5; top: 0; bottom: 0; left: -4px; width: 8px; padding: 0; background: transparent; cursor: col-resize; }
 .resize-handle:hover::after { content: ""; position: absolute; inset: 0 3px; background: var(--violet); }
+.app-shell[data-companion-collapsed="true"] .resize-handle { display: none; }
+
+.panel-collapse-toggle { position: absolute; z-index: 6; top: 50%; left: -14px; display: grid; width: 28px; height: 44px; place-items: center; border: 1px solid #2b3340; border-radius: 8px; background: #171c25; color: #a5afbd; font-size: 15px; transform: translateY(-50%); transition: background 160ms, border-color 160ms, color 160ms; }
+.panel-collapse-toggle:hover { border-color: #3b4453; background: #1c222d; color: #fff; }
 .sidebar-tabs { display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px 10px 0; border-bottom: 1px solid var(--line-soft); }
 .sidebar-tabs button { position: relative; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px 8px 0 0; background: transparent; color: #748092; font-size: 14px; font-weight: 500; }
 .sidebar-tabs button:hover { color: #c3cad4; }
@@ -725,6 +730,8 @@ html[data-theme="dark"] body { background: #080a0f; }
 .app-shell[data-theme="light"] .icon-button { border-color: #d7dde7; background: #fff; color: #5f6b7e; box-shadow: 0 2px 8px rgba(37, 48, 69, 0.04); }
 .app-shell[data-theme="light"] .command-trigger:hover,
 .app-shell[data-theme="light"] .icon-button:hover { border-color: #bfc8d6; background: #f4f6fa; color: #192235; }
+.app-shell[data-theme="light"] .panel-collapse-toggle { border-color: #d7dde7; background: #fff; color: #5f6b7e; box-shadow: 0 2px 8px rgba(37, 48, 69, 0.04); }
+.app-shell[data-theme="light"] .panel-collapse-toggle:hover { border-color: #bfc8d6; background: #f4f6fa; color: #192235; }
 .app-shell[data-theme="light"] .notification-dot { border-color: #fff; }
 .app-shell[data-theme="light"] .profile-button:hover { background: #eef2f7; }
 .app-shell[data-theme="light"] .profile-copy strong { color: #263145; }
@@ -897,7 +904,8 @@ html[data-theme="dark"] body { background: #080a0f; }
   .floating-controls { opacity: 1; transform: none; }
   .camera-switcher { grid-template-columns: 1fr; }
   .companion-sidebar { min-height: 600px; border-top: 1px solid var(--line); border-left: 0; }
-  .resize-handle { display: none; }
+  .resize-handle,
+  .panel-collapse-toggle { display: none; }
 }
 
 @media (max-width: 560px) {
