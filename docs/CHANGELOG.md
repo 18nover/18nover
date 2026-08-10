@@ -2,6 +2,24 @@
 
 All dates are 2026-08-05 unless noted otherwise.
 
+## 2026-08-10 — Left-panel AI assistant placeholder; lockard-tech deployment kickoff
+
+### Added
+
+- Left `<aside>` panel (previously an empty placeholder) now shows an "AI Assistant" header, an honest "not connected" empty state, and a disabled composer, plus a collapse toggle mirroring the companion sidebar's collapse behavior added 2026-08-08.
+
+### Verified
+
+- Full audit: Sites app (typecheck, lint, build, 3/3 rendered-HTML tests) and relay (typecheck, build, 19/19 tests, `docker compose config`) all pass. No stray branches, untracked files, or TODO/FIXME markers.
+
+### Deployment
+
+- Identified and reached the target production Docker host: `lockard-tech`, a Tailscale-connected home machine at LAN address `192.168.1.90`, reachable via SSH from the operator's Windows/PowerShell terminal.
+- Discovery: `lockard-tech` is **not** reachable from a Claude Code session running in this repo's WSL2 sandbox (`mars`) — direct LAN and Tailscale relay both fail from there, and there's no Windows interop available to route around it either. Hands-on deployment work against `lockard-tech` needs a session running directly on that host.
+- Ran the `docs/deployment-operations.md` host-baseline audit against `lockard-tech`: Docker/Compose versions and disk space clear the stated minimums, but CPU (4 vCPU) and RAM (3.7 GiB total) fall well short of the 8 vCPU/16 GiB baseline sized for two concurrent transcoders. Decision: proceed with bring-up scoped to single-camera integration testing; defer the two-camera/12-viewer capacity acceptance gate until the host is upgraded.
+- Repo cloned onto `lockard-tech` at `~/18nover`. Target public domain confirmed as `18nover.gay`; DNS pointing and router port-forwarding/tunnel to `lockard-tech`'s private LAN address remain unconfirmed.
+- Operator reports their real RTSP camera is now set up and ready at home. Credentials were correctly never shared in chat/terminal — they'll go directly into the dashboard's Host "Add RTSP Camera" sheet once the stack is live on `lockard-tech`.
+
 ## 2026-08-09 — First real relay boot, controller boot-blocking bug fix
 
 ### Added

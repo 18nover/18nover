@@ -1,7 +1,7 @@
 # 18nover — AI handoff
 
-Updated: 2026-08-09  
-Workspace: `/home/jerry/18nover/18nover.gay` (native Linux, fully tracked by git; the `C:\18nover\onlystream` Windows path and low-disk workaround described further below is historical and no longer applies)
+Updated: 2026-08-10  
+Workspace: `/home/jerry/18nover/18nover` (native Linux/WSL2, fully tracked by git; the `C:\18nover\onlystream` Windows path and low-disk workaround described further below is historical and no longer applies)
 
 ## Current outcome
 
@@ -183,27 +183,31 @@ Generated runtime symlinks and deliverables are ignored. Inspect exact file name
 - No real RTSP/RTSPS source, public stream hostname, or production Sites identity list has been supplied yet. The operator has a real camera, but it's at home and wasn't reachable this session; a real Linux Docker host is reportedly ready but connection details haven't been shared yet either.
 - Real camera **playback** (WHEP/ICE through a browser), RTSPS, redirect-negative, 12-viewer capacity, restart rehydration, backup/restore, and credential-leak acceptance remain deployment gates. (Real camera **probe** — SSRF/port-allowlist gate plus `ffprobe` codec detection — was exercised successfully against a live public test stream; see Latest verification above. That is not a substitute for the real-camera gate in `docs/deployment-operations.md`, which must run against the operator's actual camera from the actual production origin.)
 - The updated site has not been published. How Sites publishing actually works was clarified this session: candidate versions, env vars/secrets, and the audience allowlist are all managed through the ChatGPT web/desktop app's Sites panel — there is no CLI/API for it in this repo. The `NOVER_*`/`SITES_ORIGIN`/relay HMAC env var table in `docs/deployment-operations.md` is what to paste into that panel.
+- 2026-08-10: Identified and reached the real Docker host: `lockard-tech`, a Tailscale-connected home machine at LAN address `192.168.1.90`. Confirmed reachable via SSH from the operator's Windows/PowerShell terminal. **Not reachable from a Claude Code session running in this repo's WSL2 sandbox** — direct LAN (port 22) times out, and the sandbox's own Tailscale identity shows `lockard-tech` as offline/unreachable via relay even while the operator's Windows machine reaches it fine; there's also no WSL/Windows interop (`powershell.exe` isn't on `PATH`) to route around it. Conclusion for future sessions: any hands-on work against `lockard-tech` must run from a Claude Code session started directly on that host (or another host that actually reaches it), not relayed command-by-command through this sandbox.
+- 2026-08-10: Ran the host-baseline audit from `docs/deployment-operations.md` against `lockard-tech`: Docker 29.7.1 and Compose v5.4.0 both clear the 27/v2.30 minimum; disk has 70G free of 114G (minimum is 40G). CPU and RAM fall short of the stated baseline (8 vCPU / 16 GiB): `lockard-tech` has **4 vCPU and 3.7 GiB total RAM**, with only ~223 MiB free / 3.2 GiB available at idle before this stack even starts. Operator decision: proceed with bring-up on this hardware anyway, scoped to **single-camera integration testing only** (Direct or one Transcoded stream). Do not attempt the two-camera/12-viewer capacity acceptance run on this host without more RAM/CPU first — treat that gate as blocked on a hardware upgrade, not just untested.
+- 2026-08-10: Repo cloned onto `lockard-tech` at `~/18nover` (from `https://github.com/18nover/18nover.gay.git`). A sibling directory `~/onlymen` also exists on that host from unrelated prior work — leave it alone.
+- 2026-08-10: Confirmed intended public domain is `18nover.gay` (matches the GitHub repo name). DNS pointing and router port-forwarding (TCP 80/443, TCP+UDP 8189) from the public internet to `lockard-tech`'s private LAN address are not yet confirmed — `lockard-tech` only has a private RFC1918 address, so this needs either port-forwarding or a tunnel (Tailscale Funnel/Cloudflare Tunnel) before `18nover.gay` can actually reach it.
 
 Do not describe those items as complete.
 
 ## Inputs still required
 
-1. Linux Docker host connection details (operator says a host is ready, but hasn't shared SSH/access details in-session yet).
-2. Public stream hostname and DNS/TLS control.
-3. TCP 80/443 and UDP/TCP 8189 reachability.
-4. The operator's real RTSP/RTSPS camera and read-only credentials (exists, at home, not available this session).
+1. ~~Linux Docker host connection details~~ — resolved 2026-08-10: `lockard-tech`, reachable via SSH from the operator's Windows terminal (not from this repo's WSL2 sandbox — see note above). Host baseline is short on CPU/RAM; proceeding at single-camera scope only.
+2. DNS for `18nover.gay` pointed at a public entry point, plus router port-forwarding or a tunnel to `lockard-tech`'s private LAN address (`192.168.1.90`) for TCP 80/443 and TCP+UDP 8189. Not yet confirmed.
+3. TCP 80/443 and UDP/TCP 8189 reachability from the public internet — blocked on item 2.
+4. The operator's real RTSP/RTSPS camera and read-only credentials — operator reports the camera is now set up and ready at home. Credentials still need to be entered directly into the running dashboard's Host **Add RTSP Camera** sheet once the stack is live; they were correctly never typed into this session's chat/terminal and must not be in the future either.
 5. Stable Sites Host, Moderator, and Member user IDs.
 6. Existing authenticated realtime WebSocket and audio-only LiveKit integration details if those companions must be live.
 
 ## Recommended next actions
 
 1. Preserve the hydration regression test and light-first theme behavior.
-2. Get SSH/access details for the operator's real Linux Docker host, then run the (now-fixed) deployment runbook there: create secrets with the corrected `chmod 644` step, build the custom MediaMTX image, bring up the full stack including Caddy/TLS, and confirm `/healthz` and `/readyz` from outside the host.
-3. Run the redirect, pinned-destination, RTSPS, and container-isolation tests on that real host.
-4. When the operator's real camera is available at home, add it and validate Direct or Transcoded playback end to end (not just the probe step already exercised against a public test stream).
+2. From a Claude Code session (or shell) running directly on `lockard-tech`: create `relay/.env` and secrets with the corrected `chmod 644` step, confirm DNS/port-forwarding for `18nover.gay` land on this host, build the custom MediaMTX image, bring up the full stack including Caddy/TLS, and confirm `/healthz` and `/readyz` from outside the host.
+3. Run the redirect and pinned-destination tests that fit within single-camera scope; defer full container-isolation/capacity testing until the hardware gap (4 vCPU/3.7 GiB vs. the 8/16 baseline) is addressed.
+4. Add the operator's real camera through the Host sheet and validate Direct or Transcoded playback end to end (not just the probe step already exercised against a public test stream in the prior session).
 5. Deploy an access-restricted Sites candidate through the ChatGPT Sites panel for named operators only, using the env var table in `docs/deployment-operations.md`.
-6. Run WHEP lifecycle, two-camera/12-viewer capacity, rollback, and credential-leak gates.
-7. Widen access only after every gate passes.
+6. Run the WHEP lifecycle gate at single-camera scope. Defer the two-camera/12-viewer capacity, rollback, and credential-leak gates until `lockard-tech` (or a replacement host) meets the stated baseline.
+7. Widen access only after every applicable gate passes.
 
 ## UI follow-up ideas
 
