@@ -143,6 +143,7 @@ export default function Dashboard() {
   const [sideTab, setSideTab] = useState<SideTab>("chat");
   const [sidebarWidth, setSidebarWidth] = useState(384);
   const [companionCollapsed, setCompanionCollapsed] = useState(false);
+  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingCamera, setEditingCamera] = useState<CameraSummary | null>(null);
   const [cameraMenuId, setCameraMenuId] = useState<string | null>(null);
@@ -661,7 +662,7 @@ export default function Dashboard() {
   };
 
   return (
-    <main className="app-shell" data-theme={colorTheme} data-companion-collapsed={companionCollapsed} style={{ "--sidebar-width": `${companionCollapsed ? 0 : sidebarWidth}px` } as React.CSSProperties}>
+    <main className="app-shell" data-theme={colorTheme} data-companion-collapsed={companionCollapsed} data-left-panel-collapsed={leftPanelCollapsed} style={{ "--sidebar-width": `${companionCollapsed ? 0 : sidebarWidth}px` } as React.CSSProperties}>
       <header className="topbar">
         <div className="brand-lockup">
           <span className="brand-mark">18</span>
@@ -709,7 +710,23 @@ export default function Dashboard() {
       </header>
 
       <section className="dashboard-grid">
-        <aside className="side-panel" aria-label="Panel" />
+        <aside className="side-panel" aria-label="AI assistant panel">
+          <button
+            className="panel-collapse-toggle side-panel-toggle"
+            onClick={() => setLeftPanelCollapsed((collapsed) => !collapsed)}
+            aria-label={leftPanelCollapsed ? "Show AI assistant panel" : "Hide AI assistant panel"}
+            aria-pressed={leftPanelCollapsed}
+          >
+            <span aria-hidden="true">{leftPanelCollapsed ? "›" : "‹"}</span>
+          </button>
+          <div className="companion-card">
+            <div className="assistant-topbar">
+              <span className="assistant-mark" aria-hidden="true">AI</span>
+              <div><strong>AI Assistant</strong><small>Not connected</small></div>
+            </div>
+            <AssistantPanel />
+          </div>
+        </aside>
 
         <section className="stage-column">
           <div className={`video-stage ${pendingCameraId ? "is-connecting" : ""}`}>
@@ -848,6 +865,13 @@ function ChatPanel({ composer, setComposer, realtimeAvailable, showToast, voiceS
       {DEV_PREVIEW && <p className="panel-footnote">Preview data only. Production messages arrive exclusively from the authenticated realtime service.</p>}
     </div>
     <form className="composer" onSubmit={send}><button type="button" aria-label="Add attachment" disabled={!realtimeAvailable}>+</button><input value={composer} onChange={(event) => setComposer(event.target.value)} placeholder={realtimeAvailable ? "Message the stream…" : "Chat unavailable"} aria-label="Chat message" disabled={!realtimeAvailable} /><button type="button" aria-label="Choose emoji" disabled={!realtimeAvailable}>☺</button><button className="send-button" aria-label="Send message" disabled={!realtimeAvailable}>↑</button></form>
+  </div>;
+}
+
+function AssistantPanel() {
+  return <div className="panel-body assistant-panel">
+    <div className="empty-state"><span aria-hidden="true">AI</span><strong>No assistant conversation yet</strong><p>This panel will host an authenticated AI chat assistant. Nothing is connected yet.</p></div>
+    <form className="guide-composer" onSubmit={(event) => event.preventDefault()}><input placeholder="AI assistant unavailable" aria-label="Message the AI assistant" disabled /><kbd>↵</kbd></form>
   </div>;
 }
 
