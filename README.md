@@ -79,4 +79,4 @@ npm run typecheck
 npm test
 ```
 
-Sites release is intentionally two-step. After the local and relay preflight checks pass, deploy one access-restricted candidate for named operators only and run the real-camera integration from that exact origin. Do not widen access to the intended private audience until the candidate passes DNS/TLS/ICE, real RTSP playback, capacity, rollback, WHEP lifecycle, and the fail-closed credential-leak audit in `docs/`. If an access-restricted candidate is unavailable, stop rather than publish with broader access.
+Sites release is intentionally two-step. After the local and relay preflight checks pass, deploy one access-restricted candidate for named operators only and run the real-camera integration from that exact origin. Do not widen access to the intended private audience until the candidate passes DNS/TLS/ICE, real RTSP playback, capacity, rollback, WHEP lifecycle, and the fail-closed credential-leak audit in [docs/security-acceptance.md](docs/security-acceptance.md). If an access-restricted candidate is unavailable, stop rather than publish with broader access.

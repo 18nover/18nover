@@ -13,6 +13,8 @@ The repo has two independently-versioned halves that must both be kept green:
 
 Read `docs/HANDOFF.md` and `docs/CHANGELOG.md` before starting work — they carry current-state context (what's verified, what's not shipped, non-negotiable product rules) that isn't derivable from the code alone. Update both at the end of a session per the global session-handoff rule.
 
+Before touching deployment, release, or anything security-sensitive, also read `docs/deployment-operations.md` (bring-up, release gates, capacity/backup/rollback procedures) and `docs/security-acceptance.md` (trust boundaries, negative-test matrix, fail-closed credential-leak audit) — both are referenced from `README.md` but not derivable from the code.
+
 ## Commands
 
 ### Sites app (repo root, Node >=22.13)
