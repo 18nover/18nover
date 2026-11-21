@@ -19,13 +19,12 @@ export const site = {
 export const onlymen = {
   name: "OnlyMen",
   brandDomain: "onlymen.gay",
-  /** Live URL until onlymen.gay DNS is pointed at the OnlyMen project. */
-  url: "https://onlymen.vercel.app",
-  joinCreator: "https://onlymen.vercel.app/join?as=creator",
+  url: "https://onlymen.gay",
+  joinCreator: "https://onlymen.gay/join?as=creator",
   legal: {
-    terms: "https://onlymen.vercel.app/terms",
-    privacy: "https://onlymen.vercel.app/privacy",
-    statement2257: "https://onlymen.vercel.app/2257",
-    guidelines: "https://onlymen.vercel.app/guidelines",
+    terms: "https://onlymen.gay/terms",
+    privacy: "https://onlymen.gay/privacy",
+    statement2257: "https://onlymen.gay/2257",
+    guidelines: "https://onlymen.gay/guidelines",
   },
 } as const;
