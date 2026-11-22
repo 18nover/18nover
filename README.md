@@ -21,6 +21,10 @@ All public URLs and the contact address live in `lib/config.ts`.
 
 Product and legal links point at the OnlyMen brand domain (`onlymen.gay`).
 
+## Documentation
+
+Company, domain, deploy, and roadmap notes live in [`docs/`](docs/README.md).
+
 ## Legal
 
 Footer Terms, Privacy, 2257, and Guidelines links go to OnlyMen’s existing pages. Those pages are still drafts pending lawyer review.
