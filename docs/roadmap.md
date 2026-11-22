@@ -19,14 +19,14 @@ Proposed order for the company side. Later steps depend on earlier ones. Do not 
 
 ## Planned Cloudflare move
 
-**Status: plan only. The migration has not started.** Do not change live infrastructure, DNS, or this repository for a Cloudflare cutover until Jerry approves the plan and cutover work begins.
+**Status: Phase 1 (preview) is in this repo. DNS cutover has not started.** Production `18nover.gay` still points at Vercel. Do not change Porkbun records, add Custom Domains, or touch the Vercel project until Jerry and Supervisor approve the later phases.
 
 Jerry asked to leave Vercel before the site takes payments, and to start on the free or cheapest path. Supervisor holds the full shared plan (OnlyMen and 18nover together). This section is the 18nover slice only.
 
-**Preferred path for this company site:** enable Next.js static export (`output: "export"` in `next.config.ts`, if it builds cleanly) and deploy as **Cloudflare Workers Static Assets**. Static asset requests are free and unlimited on Workers and would not consume the account’s daily Worker request quota. Keep the `mailto:` contact form as-is; no backend is required.
+**Path taken:** Next.js static export (`output: "export"`) served as **Workers Static Assets**. The export builds cleanly, so vinext is not used. The `mailto:` contact form is unchanged. Details, deploy commands, and pending cutover steps are in [Cloudflare preview](cloudflare.md).
 
-**Fallback:** if static export is blocked by a Next.js feature, use [vinext](https://github.com/cloudflare/vinext) (Cloudflare’s current Next.js-on-Workers path) and deploy a Worker. That can still start at $0.
+The preview hostname is `https://18nover.18nover.workers.dev` (Worker name `18nover`, account workers.dev subdomain `18nover`). Publishing that Worker requires Wrangler auth on the 18nover Cloudflare account.
 
-When work is approved, it should happen on a branch in `18nover/18nover`, deploy first to a `*.workers.dev` preview, and only then consider DNS. Porkbun should stay the registrar. A production Custom Domain on Workers needs the zone on Cloudflare, which means a later nameserver move — email MX, SPF, DKIM, and verification records have to be copied first. Vercel should keep serving `18nover.gay` until Cloudflare HTTPS is verified on the real domain. Rollback is switching nameservers back.
+Porkbun stays the registrar. A production Custom Domain needs the zone on Cloudflare, which means a later nameserver move — email MX, SPF, DKIM, and verification records have to be copied first. Vercel should keep serving `18nover.gay` until Cloudflare HTTPS is verified on the real domain. Rollback is switching nameservers back.
 
-The 18nover bot must not start this migration on its own. Supervisor coordinates the shared Cloudflare account and any nameserver cutover. OnlyMen’s move is a separate, heavier piece of work owned by the onlymen bot.
+Supervisor coordinates the shared Cloudflare account and any nameserver cutover. OnlyMen’s move is a separate, heavier piece of work owned by the onlymen bot.

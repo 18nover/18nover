@@ -13,6 +13,8 @@ npm install
 npm run dev
 ```
 
+The site is a Next.js static export. `npm run build` writes HTML to `out/`. `npm run preview` (or `npm start`) serves that export through Wrangler after a build. `npm run deploy` publishes the Worker to the `18nover` Cloudflare account’s workers.dev preview only — it does not change `18nover.gay` DNS or the Vercel project. See [`docs/cloudflare.md`](docs/cloudflare.md).
+
 ## Config
 
 All public URLs and the contact address live in `lib/config.ts`.

@@ -19,6 +19,7 @@ This folder describes what is live today, what is still open, and which bot owns
 | [Company legal pages](legal.md) | Current footer links vs. company-level pages still to write |
 | [Bot ownership](ownership.md) | Who owns the company site vs. OnlyMen vs. shared infra |
 | [Roadmap](roadmap.md) | Open items, proposed order, and the planned Cloudflare move |
+| [Cloudflare preview](cloudflare.md) | Static export to Workers Static Assets; workers.dev only; cutover still pending |
 
 ## Snapshot
 
@@ -29,6 +30,6 @@ This folder describes what is live today, what is still open, and which bot owns
 - The site is a static marketing page plus a `mailto:` form. There is no database, no auth, and no server API.
 - `CONTACT_EMAIL` in `lib/config.ts` is still the placeholder `hello@18nover.gay`. That mailbox does not exist yet.
 - 18nover LLC has been researched for Kentucky and has **not** been filed.
-- A move off Vercel to Cloudflare is planned and has **not** started. See [Roadmap](roadmap.md#planned-cloudflare-move).
+- Cloudflare: the site now static-exports and is configured for a Workers Static Assets preview on `18nover.18nover.workers.dev`. Production DNS and Vercel are unchanged. See [Cloudflare preview](cloudflare.md).
 
 Do not put API keys, tokens, passwords, or other secrets in these docs.

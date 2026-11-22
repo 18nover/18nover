@@ -42,4 +42,8 @@ Crest, favicon, Open Graph image, and flourish artwork live in `public/`:
 
 Because the contact form only opens a mail client, the site has no inbox of its own and no spam or storage concerns on the server. It also means messages only send if the visitor has a working mail client, and they go to whatever `CONTACT_EMAIL` is set to — currently a placeholder, not a live mailbox. See [Business email](business-email.md).
 
-The same simplicity is why the planned Cloudflare path prefers a static export. See [Roadmap](roadmap.md#planned-cloudflare-move).
+The same simplicity is why the site can static-export to Cloudflare Workers Static Assets. See [Cloudflare preview](cloudflare.md).
+
+## Cloudflare build
+
+`next.config.ts` sets `output: "export"`. `next build` writes a static site to `out/`, which Wrangler publishes as an assets-only Worker. vinext is not required. See [Cloudflare preview](cloudflare.md).
