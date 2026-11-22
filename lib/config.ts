@@ -13,7 +13,7 @@ export const site = {
   url: "https://18nover.gay",
   tagline: "Built for Men. Made for Grown-Ups.",
   description:
-    "18nover is an adults-only company, built by and for gay men. We are the parent company behind OnlyMen, a creator-first platform for adult men.",
+    "18nover is an adults-only company, built by and for gay men. We are the parent company behind OnlyMen, an invite-only 18+ app — coming soon — for meeting nearby, chatting, and watching verified creators go live, with privacy and safety first.",
 } as const;
 
 export const onlymen = {
@@ -21,6 +21,9 @@ export const onlymen = {
   brandDomain: "onlymen.gay",
   url: "https://onlymen.gay",
   joinCreator: "https://onlymen.gay/join?as=creator",
+  // Live rooms are planned for onlymen.live but are not open yet.
+  // Mention the domain in copy; do not link it until the rooms are actually up.
+  liveDomain: "onlymen.live",
   legal: {
     terms: "https://onlymen.gay/terms",
     privacy: "https://onlymen.gay/privacy",

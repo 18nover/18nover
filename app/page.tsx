@@ -23,7 +23,8 @@ export default function HomePage() {
                   Made for Grown-Ups.
                 </h1>
                 <p className="lede">
-                  The parent company behind OnlyMen, a creator-first platform for adult men.
+                  The parent company behind OnlyMen, an invite-only beta for 18+ men: see who&apos;s
+                  nearby, chat, and — soon — watch verified creators in their own live rooms.
                 </p>
                 <div className="cta">
                   <a className="btn-gold" href={onlymen.url}>
@@ -56,9 +57,9 @@ export default function HomePage() {
                   <div>
                     <h3>Creator-First</h3>
                     <p>
-                      Creators come first in everything we ship. On OnlyMen they own their
-                      profiles, set their terms, and keep control of how they appear and earn —
-                      not as listings to be managed, but as the reason the platform exists.
+                      Creators come first in everything we ship. Verified creators control their
+                      profiles and how they appear. When live rooms open, they will stream from
+                      spaces of their own.
                     </p>
                   </div>
                 </li>
@@ -82,9 +83,10 @@ export default function HomePage() {
                   <div>
                     <h3>Privacy by Design</h3>
                     <p>
-                      You decide what you share, and with whom. We collect only what we need to
-                      run the service, keep personal details under tight control, and never treat
-                      private photos or messages as marketing material.
+                      You decide what you share, and with whom. The optional live map shows only
+                      fuzzed locations, never exact ones. We collect only what we need to run the
+                      service, keep personal details under tight control, and never treat private
+                      photos or messages as marketing material.
                     </p>
                   </div>
                 </li>
@@ -97,19 +99,35 @@ export default function HomePage() {
               <h2 id="products-title" className="section-title text-gold">
                 Our Products
               </h2>
-              <a className="product-card" href={onlymen.url}>
-                <img src="/crest.png" alt="" width={96} height={96} />
-                <div>
-                  <h3 className="text-gold">
-                    Only<em>Men</em>
-                  </h3>
-                  <p className="product-domain">{onlymen.brandDomain}</p>
-                  <p className="product-blurb">
-                    A creator-first platform for adult men — profiles, companionship, and live
-                    connection, with ID verification for creators and a strict 18+ gate.
-                  </p>
+              <div className="product-list">
+                <a className="product-card" href={onlymen.url}>
+                  <img src="/crest.png" alt="" width={96} height={96} />
+                  <div>
+                    <h3 className="text-gold">
+                      Only<em>Men</em>
+                    </h3>
+                    <p className="product-domain">{onlymen.brandDomain}</p>
+                    <p className="product-blurb">
+                      An invite-only 18+ app — coming soon — for men to browse a distance-sorted
+                      grid of people nearby, chat, and opt into a live map that fuzzes locations
+                      so no one sees exactly where you are. A Plus tier is on the way.
+                    </p>
+                  </div>
+                </a>
+                <div className="product-card product-card-static">
+                  <img src="/crest.png" alt="" width={96} height={96} />
+                  <div>
+                    <h3 className="text-gold">
+                      Only<em>Men</em> Live
+                    </h3>
+                    <p className="product-domain">{onlymen.liveDomain}</p>
+                    <p className="product-blurb">
+                      Coming soon: verified creators will stream in their own live rooms on{" "}
+                      {onlymen.liveDomain}. That experience is not open yet.
+                    </p>
+                  </div>
                 </div>
-              </a>
+              </div>
             </div>
           </section>
 
@@ -171,6 +189,7 @@ export default function HomePage() {
             </nav>
             <p className="notice">
               18nover products are for adults only. You must be 18 or older to use OnlyMen.
+              OnlyMen is an invite-only beta, coming soon.
             </p>
             <p className="copy">© 2026 {site.name}</p>
           </div>

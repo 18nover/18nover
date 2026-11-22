@@ -31,6 +31,7 @@ The core set used in conversation and design references is ink, gold, oxblood, r
 
 - Hero / tagline: “Built for Men. Made for Grown-Ups.” (`lib/config.ts` and the homepage hero)
 - Positioning: 18nover is an adults-only company, built by and for gay men, and is the parent company behind OnlyMen.
+- OnlyMen (`onlymen.gay`) is an invite-only 18+ nearby app (coming soon): a distance-sorted grid, chat, an optional live map with fuzzed locations (never exact), and a Plus tier named without prices. Verified-creator live rooms are planned for `onlymen.live` and should be described as coming soon until that product is actually open. Do not describe OnlyMen as escorting, paid booking, or companionship-for-pay. Do not name other dating or hookup apps. Do not publish prices or name payment processors.
 
 Do not invent a phone number, street address, or live support hours. The site already says email is the only contact path.
 

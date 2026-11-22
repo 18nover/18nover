@@ -21,7 +21,7 @@ All public URLs and the contact address live in `lib/config.ts`.
 
 `CONTACT_EMAIL` (`hello@18nover.gay`) is a **placeholder**. Replace it once the mailbox exists. Do not add phone numbers or a street address unless they are real.
 
-Product and legal links point at the OnlyMen brand domain (`onlymen.gay`).
+Product and legal links point at the OnlyMen brand domain (`onlymen.gay`). OnlyMen is described as an invite-only 18+ nearby app (coming soon), with live rooms on `onlymen.live` mentioned but not linked until that product is open.
 
 ## Documentation
 

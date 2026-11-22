@@ -398,6 +398,25 @@ button:disabled { cursor: default; }
 }
 
 /* ——— Products ——— */
+.product-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
+.product-list .product-card {
+  margin-top: 0;
+  width: 100%;
+}
+
+.product-card-static {
+  cursor: default;
+}
+
+.product-card-static:hover { filter: none; }
+
 .product-card {
   display: flex;
   align-items: center;

@@ -23,7 +23,7 @@ There is a single route: `app/page.tsx`.
 
 - Header: About, Products, Contact, plus a “Visit OnlyMen” link (`components/header.tsx`)
 - Hero: “Built for Men. Made for Grown-Ups.”
-- About, products (OnlyMen), trust/safety strip, contact
+- About, products (OnlyMen nearby app and coming-soon live rooms), trust/safety strip, contact
 - Footer legal links currently go to OnlyMen’s pages (see [Company legal pages](legal.md))
 
 Public copy, product URLs, and the contact address all live in `lib/config.ts`. Change URLs there rather than scattering them through components.
